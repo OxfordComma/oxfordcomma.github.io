@@ -1,1 +1,1 @@
-# oxfordcomma.github.io
+This data is collected by a service called [last.fm](https://last.fm), which has been aggregating my music plays via iTunes and Spotify since 2008. The data shows the top 20 artists by play count, as tracked by the service. The data was accessed from my [profile](https://last.fm/user/philosiphicus) via a service called [last.fm to csv](https://benjaminbenben.com/lastfm-to-csv/), using my username (philosiphicus).

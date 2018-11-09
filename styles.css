@@ -1,0 +1,29 @@
+body {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: 0;
+  overflow: hidden;
+  background-color: white;
+}
+
+path {
+  fill: none;
+  stroke: #a8a1dd;
+}
+
+text {
+  /*
+  text-shadow:
+   -1px -1px 3px purple,
+   -1px  1px 3px purple,
+    1px -1px 3px purple,
+    1px  1px 3px purple;
+  */
+	color: 'black';
+  stroke-width: 15px;
+  pointer-events: none;
+  font-family: 'Playfair Display', serif;
+}
