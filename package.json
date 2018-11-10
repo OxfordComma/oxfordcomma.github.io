@@ -1,8 +1,28 @@
 {
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "start": "node server.js",
+    "devstart": "nodemon server.js"
   },
   "devDependencies": {
+    "nodemon": "^1.18.6",
     "rollup": "latest"
-  }
+  },
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "name": "oxfordcomma.github.io",
+  "description": "This data is collected by a service called [last.fm](https://last.fm), which has been aggregating my music plays via iTunes and Spotify since 2008. The data shows the top 20 artists by play count, as tracked by the service. The data was accessed from my [profile](https://last.fm/user/philosiphicus) via a service called [last.fm to csv](https://benjaminbenben.com/lastfm-to-csv/), using my username (philosiphicus).",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OxfordComma/oxfordcomma.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OxfordComma/oxfordcomma.github.io/issues"
+  },
+  "homepage": "https://github.com/OxfordComma/oxfordcomma.github.io#readme"
 }
