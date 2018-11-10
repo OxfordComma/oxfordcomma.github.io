@@ -4,8 +4,8 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
-  margin: 0;
-  overflow: hidden;
+  margin: 100;
+  overflow: scroll;
   background-color: white;
 }
 
@@ -15,14 +15,7 @@ path {
 }
 
 text {
-  /*
-  text-shadow:
-   -1px -1px 3px purple,
-   -1px  1px 3px purple,
-    1px -1px 3px purple,
-    1px  1px 3px purple;
-  */
-	color: 'black';
+	color: 'white';
   stroke-width: 15px;
   pointer-events: none;
   font-family: 'Playfair Display', serif;

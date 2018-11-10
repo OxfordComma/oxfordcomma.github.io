@@ -9,6 +9,11 @@ app.get('/', function(req, res) {
 app.get('/bundle.js', function(req, res) {
     res.sendFile(path.join(__dirname + '/bundle.js'));
 });
+
+app.get('/index.js', function(req, res) {
+    res.sendFile(path.join(__dirname + '/index.js'));
+});
+
 app.get('/data.json', function(req, res) {
     res.sendFile(path.join(__dirname + '/data.json'));
 });

@@ -151,7 +151,7 @@
   };
 
   const svg = d3.select('svg');
-  const width = 500;//document.body.clientWidth;
+  const width = document.body.clientWidth/2;
   const height = 2000;//document.body.clientHeight;
 
   const margin = { top: 0, right: 0, bottom: 0, left: 0};
