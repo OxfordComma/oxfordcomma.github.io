@@ -1,21 +1,20 @@
 body {
-  position: fixed;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   margin: 100;
-  overflow: scroll;
+  /*overflow: scroll;*/
   background-color: white;
 }
 
-path {
+.tree path{
   fill: none;
   stroke: #a8a1dd;
 }
 
 text {
-	color: 'white';
+	color: 'black';
   stroke-width: 15px;
   pointer-events: none;
   font-family: 'Playfair Display', serif;
