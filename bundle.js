@@ -248,7 +248,7 @@
         .attr('width', backgroundRectWidth)
         .attr('height', spacing * n + circleRadius * 2) 
         .attr('fill', 'white')
-        .attr('opacity', 1);
+        .attr('opacity', 0);
 
     const groups = selection.selectAll('.legend')
       .data(colorScale.domain());
@@ -312,7 +312,7 @@
     const yAxisLabel = 'Plays'; 
     
     // X-axis and scale
-    console.log(new Date(2018, 1, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1));
+    console.log(new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1));
     const xScale = d3$1.scaleTime()
       .domain([
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
@@ -390,7 +390,11 @@
     var series = stack(dataToStack);
     
     const areaGenerator = d3$1.area()
-      .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+      .x(d => {
+        var toScale = new Date(2018, 0, (d.data.week - 1) * 7);
+        // console.log(toScale)
+        return xScale(toScale);
+      })
       .y0(d =>  yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
       .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
       .curve(d3$1.curveBasis);
@@ -434,13 +438,13 @@
     .append('g');
 
   const areaGenreG = areaGenreSvg.append('g')
-      .attr('transform', `translate(${135},${10})`);
+      .attr('transform', `translate(${155},${10})`);
   const genreLegendG = areaGenreSvg.append('g')
     .attr('class', 'genre-legend')
     .attr('transform', `translate(${10},${10})`);
 
   const areaArtistG = areaArtistSvg.append('g')
-      .attr('transform', `translate(${135},${10})`);
+      .attr('transform', `translate(${155},${10})`);
   const artistLegendG = areaArtistSvg.append('g')
     .attr('transform', `translate(${10},${10})`);
 

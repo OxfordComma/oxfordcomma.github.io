@@ -44,7 +44,7 @@ export const stackedArea = (selection, props) => {
   const yAxisLabel = 'Plays'; 
   
   // X-axis and scale
-  console.log(new Date(2018, 1, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
+  console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
   const xScale = scaleTime()
     .domain([
       new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
@@ -122,7 +122,11 @@ export const stackedArea = (selection, props) => {
   var series = stack(dataToStack);
   
   const areaGenerator = area()
-    .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+    .x(d => {
+      var toScale = new Date(2018, 0, (d.data.week - 1) * 7)
+      // console.log(toScale)
+      return xScale(toScale);
+    })
     .y0(d =>  yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
     .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
     .curve(curveBasis);

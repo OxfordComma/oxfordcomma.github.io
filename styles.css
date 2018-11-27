@@ -3,14 +3,14 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
-  /*margin: 100;*/
+  /*margin: 0 ;*/
   background-color: white;
   overflow: scroll;
 }
 
 h1 {
   font-size: 3.2em;
-  text-align: center;
+  text-align: left;
 }
 
 /*Tree*/
@@ -50,4 +50,8 @@ h1 {
   stroke-linejoin: round;
   stroke-linecap: round;
   mix-blend-mode: multiply;
+}
+
+.navbar {
+  margin-bottom: 0;
 }

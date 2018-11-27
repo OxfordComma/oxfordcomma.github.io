@@ -22,7 +22,7 @@ export const colorLegend = (selection, props) => {
       .attr('width', backgroundRectWidth)
       .attr('height', spacing * n + circleRadius * 2) 
       .attr('fill', 'white')
-      .attr('opacity', 1);
+      .attr('opacity', 0);
 
   const groups = selection.selectAll('.legend')
     .data(colorScale.domain());

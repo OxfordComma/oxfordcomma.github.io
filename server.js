@@ -3,7 +3,7 @@ var app = express();
 var path = require('path');
 
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'));
+    res.sendFile(path.join(__dirname + '/html/index.html'));
 });
 
 app.get('/bundle.js', function(req, res) {
@@ -15,7 +15,7 @@ app.get('/index.js', function(req, res) {
 });
 
 app.get('/data.json', function(req, res) {
-    res.sendFile(path.join(__dirname + '/data.json'));
+    res.sendFile(path.join(__dirname + '/data/data.json'));
 });
 
 app.get('/styles.css', function(req, res) {

@@ -15,10 +15,10 @@ import {
   schemeCategory10,
   schemeSet3
 } from 'd3';
-import { loadData } from './loadData';
-import { treemap } from './treemap';
-import { stackedArea } from './stackedArea';
-import { colorLegend } from './colorLegend';
+import { loadData } from './data/loadData';
+import { treemap } from './tree/treemap';
+import { stackedArea } from './stackedArea/stackedArea';
+import { colorLegend } from './stackedArea/colorLegend';
 
 //Hack
 const width = 960;
@@ -48,13 +48,13 @@ const zoomG = treeSvg
   .append('g');
 
 const areaGenreG = areaGenreSvg.append('g')
-    .attr('transform', `translate(${135},${10})`);
+    .attr('transform', `translate(${155},${10})`);
 const genreLegendG = areaGenreSvg.append('g')
   .attr('class', 'genre-legend')
   .attr('transform', `translate(${10},${10})`);
 
 const areaArtistG = areaArtistSvg.append('g')
-    .attr('transform', `translate(${135},${10})`);
+    .attr('transform', `translate(${155},${10})`);
 const artistLegendG = areaArtistSvg.append('g')
   .attr('transform', `translate(${10},${10})`);
 
