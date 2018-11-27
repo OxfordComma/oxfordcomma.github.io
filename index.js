@@ -15,7 +15,7 @@ import {
   schemeCategory10,
   schemeSet3
 } from 'd3';
-import { loadData } from './data/loadData';
+import { loadData } from './loadData';
 import { treemap } from './tree/treemap';
 import { stackedArea } from './stackedArea/stackedArea';
 import { colorLegend } from './stackedArea/colorLegend';
