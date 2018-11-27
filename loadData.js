@@ -18,7 +18,7 @@ export const loadData = url => {
     var byWeekPlaysGenre = [];
     var byWeekPlaysArtist = [];
     var weekDict = {};
-    const numArtists = 9;
+    const numArtists = 10;
     const numGenres = 9;
 
     // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
@@ -114,10 +114,10 @@ export const loadData = url => {
       
       artistObj['everything else'] = 0;
       genreObj['everything else'] = 0;
-      Object.keys(weekDict[w].artists).forEach(a => {
-        if (!topArtists.includes(a))
-          artistObj['everything else'] += weekDict[w].artists[a];  
-      });
+      // Object.keys(weekDict[w].artists).forEach(a => {
+      //   if (!topArtists.includes(a))
+      //     artistObj['everything else'] += weekDict[w].artists[a];  
+      // });
       byWeekPlaysArtist.push(artistObj);
 
       
@@ -131,14 +131,8 @@ export const loadData = url => {
       });
       byWeekPlaysGenre.push(genreObj); 
     });
-    topArtists.push('everything else')
-    topGenres.push('everything else')
-    // console.log(weekDict);
-    // console.log(byWeekPlaysArtist)
-    // console.log(totalPlaysArtist);
-    // console.log(totalPlaysGenre);
-    // console.log(sortedGenreList);
-    // console.log(sortedArtistList)
+    // topArtists.push('everything else');
+    topGenres.push('everything else');
 
 
     var toReturn = {}; 
@@ -149,8 +143,8 @@ export const loadData = url => {
     // toReturn.totalPlaysGenre = totalPlaysGenre;
     toReturn.totalPlaysArtist = totalPlaysArtist;
     toReturn.deepestGenresByArtist = deepestGenresByArtist;
-    toReturn.sortedGenres = topGenres;
-    toReturn.sortedArtists = topArtists;
+    toReturn.topGenres = topGenres;
+    toReturn.topArtists = topArtists;
     console.log(toReturn);  
     return toReturn;  
   }).then(r => {return r;}); 

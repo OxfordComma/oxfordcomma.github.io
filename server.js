@@ -22,4 +22,12 @@ app.get('/styles.css', function(req, res) {
     res.sendFile(path.join(__dirname + '/styles.css'));
 });
 
+app.get('/js/bootstrap.min.js', function(req, res) {
+    res.sendFile(path.join(__dirname + '/js/bootstrap.min.js'));
+});
+
+app.get('/css/bootstrap.min.css', function(req, res) {
+    res.sendFile(path.join(__dirname + '/css/bootstrap.min.css'));
+});
+
 app.listen(3000);

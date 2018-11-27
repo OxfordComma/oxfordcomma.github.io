@@ -19,7 +19,7 @@
       var byWeekPlaysGenre = [];
       var byWeekPlaysArtist = [];
       var weekDict = {};
-      const numArtists = 9;
+      const numArtists = 10;
       const numGenres = 9;
 
       var genreHierarchy = d3$1.hierarchy(jsonData); 
@@ -108,10 +108,10 @@
         
         artistObj['everything else'] = 0;
         genreObj['everything else'] = 0;
-        Object.keys(weekDict[w].artists).forEach(a => {
-          if (!topArtists.includes(a))
-            artistObj['everything else'] += weekDict[w].artists[a];  
-        });
+        // Object.keys(weekDict[w].artists).forEach(a => {
+        //   if (!topArtists.includes(a))
+        //     artistObj['everything else'] += weekDict[w].artists[a];  
+        // });
         byWeekPlaysArtist.push(artistObj);
 
         
@@ -125,14 +125,8 @@
         });
         byWeekPlaysGenre.push(genreObj); 
       });
-      topArtists.push('everything else');
+      // topArtists.push('everything else');
       topGenres.push('everything else');
-      // console.log(weekDict);
-      // console.log(byWeekPlaysArtist)
-      // console.log(totalPlaysArtist);
-      // console.log(totalPlaysGenre);
-      // console.log(sortedGenreList);
-      // console.log(sortedArtistList)
 
 
       var toReturn = {}; 
@@ -143,8 +137,8 @@
       // toReturn.totalPlaysGenre = totalPlaysGenre;
       toReturn.totalPlaysArtist = totalPlaysArtist;
       toReturn.deepestGenresByArtist = deepestGenresByArtist;
-      toReturn.sortedGenres = topGenres;
-      toReturn.sortedArtists = topArtists;
+      toReturn.topGenres = topGenres;
+      toReturn.topArtists = topArtists;
       console.log(toReturn);  
       return toReturn;  
     }).then(r => {return r;}); 
@@ -159,43 +153,32 @@
       innerHeight,
       playScale
     } = props;
+
+    const treeWidth = 500;
+    const treeHeight = 2000;
+
+    var maxGenreDepth = 0;
     
     const treeLayout = d3$1.cluster()
-      .size([2000, 500])
+      .size([treeHeight, treeWidth])
       .separation((a, b) => { 
-        // console.log(a.parent == b.parent)
-        return (a.parent == b.parent ? 1 : 1); 
+        return (a.parent == b.parent ? 0.7 : 1); 
       });
 
     const root = d3$1.hierarchy(jsonData);  
     
-    // var filtArtistData = [];
-    // Object.keys(artistData).map(k => {
-    //   if (artistData[k].plays > 5)
-  		// 	filtArtistData.push(artistData[k]); 
-    // })
-    
-    // filtArtistData.forEach(f => {
-    //   var deepestGenreIndex = 0;
-    //   for (var i = 0; i < f.genre.length; i++)
-  		// 	if (f.genreDepths[i] > f.genreDepths[deepestGenreIndex])
-    //       deepestGenreIndex = i;
-    //   f.deepestGenre = f.genre[deepestGenreIndex];
-    // })
-    // //console.log(filtArtistData);
-    
     root.descendants().forEach(d => {
       const genre = d.data.id;
-      // console.log(Object.keys(deepestGenresByArtist))
-    //   filtArtistData.filter(a => a.deepestGenre === genre).forEach(f => {
+      maxGenreDepth = d.depth > maxGenreDepth ? d.depth : maxGenreDepth;
         Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
-        // console.log(f);
         if (totalPlaysArtist[f] < 5)
           return;
 
-        var newNode = d3$1.hierarchy({id: f, artist: f, plays: totalPlaysArtist[f]});
-        console.log(newNode);
-        // newNode.data.id = newNode.data.artist; 
+        var newNode = d3$1.hierarchy({
+          id: f, 
+          artist: f, 
+          plays: totalPlaysArtist[f]
+        });
         newNode.parent = d;  
         if (d.children === undefined)
           d.children = [];
@@ -204,34 +187,25 @@
       });
     });
     
-    // console.log(root); 
-    // Todo: Fix this duplicated logic from loadData
     root.sort((a,b) => {
-      // console.log(a);
-      // console.log('a:' + a.data.id + ' ' + (a.children === undefined ? -1 : a.children.length));
-      // console.log('b:' + b.data.id + ' ' + (b.children === undefined ? -1 : b.children.length));
       var aLen = a.children === undefined ? -1 : a.children.length;
       var bLen = b.children === undefined ? -1 : b.children.length;
-      // if (a.data.artist)
-      //   aLen = 100;
-      // if (b.data.artist)
-      //   bLen = 100;
       return(bLen - aLen); 
     });
-    // console.log(root); 
     
-    //console.log(root)
     const tree = treeLayout(root);
     const links = tree.links();    
     const linkPathGenerator = d3$1.linkHorizontal()
       .x(d => d.y)
       .y(d => d.x);
 
+    const treeSpread = 20;
+
     links.forEach(d => {
       if (d.target.data.artist)
-        d.target.y = 750;
+        d.target.y = (maxGenreDepth + 1) * treeSpread;
       else
-    		d.target.y = d.target.depth * 150;
+    		d.target.y = d.target.depth * treeSpread;
     }); 
 
     selection.selectAll('path').data(links)
@@ -243,46 +217,114 @@
         .attr('x', d => d.y)
         .attr('y', d => d.x)
         .attr('dy', '0.32em')
-        .attr('text-anchor', d => d.data.artist ? 'start' : 'start')
+        .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
     		//.attr('font-size', d => d.children ? '1em' : '0.2em')
-    		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
-        .attr('font-size', d => d.data.artist ? Math.log(d.data.plays) * 2 : '0.6em')
+    		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'white')
+        .attr('font-size', d => d.data.artist ? Math.log(d.data.plays) * 2 : '1.1em')
         .text(d => d.data.id); 
+  };
+
+  const colorLegend = (selection, props) => {
+    const {
+      colorScale,
+      circleRadius,
+      spacing,
+      textOffset,
+      backgroundRectWidth,
+      onClick,
+      selectedLegendItem
+    } = props;      
+
+    const backgroundRect = selection.selectAll('rect')
+      .data([null]);             
+    
+    const n = colorScale.domain().length; 
+
+    backgroundRect.enter().append('rect')
+      .merge(backgroundRect)
+        .attr('x', -circleRadius * 2)   
+        .attr('y', -circleRadius * 2)   
+        .attr('rx', circleRadius * 2)   
+        .attr('width', backgroundRectWidth)
+        .attr('height', spacing * n + circleRadius * 2) 
+        .attr('fill', 'white')
+        .attr('opacity', 1);
+
+    const groups = selection.selectAll('.legend')
+      .data(colorScale.domain());
+    
+    const groupsEnter = groups
+      .enter().append('g')
+        .attr('class', 'legend');
+    
+    groupsEnter
+      .merge(groups)
+        .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
+        .on('click', d => onClick(
+          d === selectedLegendItem ? null : d));
+        
+    groupsEnter
+      .merge(groups)
+        .transition().duration(200)
+        .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
+        .attr('opacity', d =>
+        {
+          // console.log(!selectedLegendItem);
+          return (!selectedLegendItem || d === selectedLegendItem) ? 1 : 0.2;
+        });
+
+    groups.exit().remove();
+    
+    groupsEnter.append('circle')
+      .merge(groups.select('circle')) 
+        .attr('r', circleRadius)
+        .attr('fill', colorScale);      
+    
+    groupsEnter.append('text')
+      .merge(groups.select('text'))   
+        .text(d => d)
+        .attr('dy', '0.32em')
+        .attr('x', textOffset);
   };
 
   // Mouseover line adapted from here
 
-  const scatterplot = (selection, props) => {
+  const stackedArea = (selection, props) => {
     const {
-      byWeekPlaysGenre,
+      dataToStack,
       legend,
       colorScale,
-      colorValue,
-      selectedArtist,
+      selectedLegendItem,
       innerWidth,
       innerHeight,
       circleRadius
     } = props;
-      
+    
     const g = selection.selectAll('.container').data([null]);
     const gEnter = g.enter()
       .append('g')
         .attr('class', 'container');
    
-    //const xValue = d => d.week;
+    const xValue = d => d.week;
+
 
     const xAxisLabel = 'Week';
     const yAxisLabel = 'Plays'; 
     
-    // X-scale and x-axis
-    const xScale = d3$1.scaleLinear()
-      .domain(d3$1.extent(byWeekPlaysGenre, d => d.week))
-      .range([0, innerWidth]);
+    // X-axis and scale
+    console.log(new Date(2018, 1, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1));
+    const xScale = d3$1.scaleTime()
+      .domain([
+        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
+        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
+      .range([0, innerWidth])
+      .nice();
     
     const xAxis = d3$1.axisBottom(xScale)
-      .ticks(26)
+      .ticks(9)
       .tickSize(-innerHeight)
-      .tickPadding(15);
+      .tickPadding(15)
+      .tickFormat(d3.timeFormat('%B'));
     
     // From https://vizhub.com/curran/501f3fe24cfb4e6785ac75008b530a83
     const xAxisG = g.select('.x-axis');
@@ -292,8 +334,8 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-        .attr('transform', `translate(0,${innerHeight})`)
-        .selectAll('.domain').remove();
+        .attr('transform', `translate(0,${innerHeight})`);
+        // .selectAll('.domain').remove()
     
     xAxisGEnter.append('text')
         .attr('class', 'axis-label')
@@ -305,9 +347,9 @@
     // Y-axis and scale
     const yScale = d3$1.scaleLinear()
       .domain([0, 
-               //selectedArtist ? 
-               //max(data.map(d => d[selectedArtist])) : 
-               d3$1.max(byWeekPlaysGenre.map(d => d3$1.sum(Object.values(d))))])
+               // selectedLegendItem ? 
+               // max(data.map(d => d[selectedLegendItem])) : 
+               d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
       .range([innerHeight, 0])
       .nice();  
     
@@ -342,17 +384,15 @@
       .attr('text-anchor', 'middle')
       .text(yAxisLabel);
     
-    var stack = d3.stack(byWeekPlaysGenre)
+    var stack = d3.stack(dataToStack)
       .keys(legend);
-    var series = stack(byWeekPlaysGenre);
-    //console.log(data)
+
+    var series = stack(dataToStack);
     
     const areaGenerator = d3$1.area()
-      .x(d => xScale(d.data.week))
-      .y0(d => {
-        //console.log(d)
-        return yScale(selectedArtist && (d.artist == selectedArtist) ? 0 : d[0])})
-      .y1(d => yScale(selectedArtist && (d.artist == selectedArtist) ? d[1] - d[0] : d[1]))
+      .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+      .y0(d =>  yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
+      .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
       .curve(d3$1.curveBasis);
     
     const lines = selection.selectAll('.line-path').data(series);
@@ -365,36 +405,44 @@
       .transition()
         .duration(200)
         .attr('d', areaGenerator)
-        .attr('opacity', d => (!selectedArtist || d.key === selectedArtist) ? 1 : 0)
-        .attr('stroke-width', d => (selectedArtist || d.key === selectedArtist) ? 0 : 0);
+        .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
+        .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
   };
 
-  const treeSvg = d3$1.select('.tree');
-  const areaSvg = d3$1.select('.area');
-
-  const width = +areaSvg.attr('width');
-  const height = +areaSvg.attr('height');
+  //Hack
+  const width = 960;
+  const height = 500;
 
   const margin = { top: 20, right: 0, bottom: 40, left: 20 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
-  var jsonData, artistData, byWeekPlaysGenre, totalPlaysArtist;
+  var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
+  var artistColorScale, genreColorScale;
+  var topArtists, topGenres;
   var playScale;
-  var legend;
-  var selectedArtist;
+  var selectedArtist, selectedGenre;
   var deepestGenresByArtist;
+  // var genreLegendG, artistLegendG;
 
-  const colorValue = d => d.artist;
+  const treeSvg = d3$1.select('.tree');
+  const areaGenreSvg = d3$1.select('.stacked-area-genre');
+  const areaArtistSvg = d3$1.select('.stacked-area-artist');
   const colorScale = d3$1.scaleOrdinal();
 
   const zoomG = treeSvg
-      // .attr('width', width)
-      // .attr('height', height)
     .append('g');
 
-  const areaG = areaSvg.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
+  const areaGenreG = areaGenreSvg.append('g')
+      .attr('transform', `translate(${135},${10})`);
+  const genreLegendG = areaGenreSvg.append('g')
+    .attr('class', 'genre-legend')
+    .attr('transform', `translate(${10},${10})`);
+
+  const areaArtistG = areaArtistSvg.append('g')
+      .attr('transform', `translate(${135},${10})`);
+  const artistLegendG = areaArtistSvg.append('g')
+    .attr('transform', `translate(${10},${10})`);
 
   const treeG = zoomG.append('g');
       //.attr('transform', `translate(${margin.left},${margin.top})`);
@@ -407,20 +455,38 @@
     jsonData = data.jsonData;
     artistData = data.artistData;
     byWeekPlaysGenre = data.byWeekPlaysGenre;
-    legend = data.sortedGenres;
+    byWeekPlaysArtist = data.byWeekPlaysArtist;
+    topGenres = data.topGenres;
+    topArtists = data.topArtists;
     deepestGenresByArtist = data.deepestGenresByArtist;
     totalPlaysArtist = data.totalPlaysArtist;
 
-    colorScale
-      .domain(legend)
+    artistColorScale = d3$1.scaleOrdinal()
+      .domain(topArtists)
       .range(d3$1.schemeCategory10);
-   	
-    console.log(d3$1.max(Object.values(totalPlaysArtist)));
+
+   	genreColorScale = d3$1.scaleOrdinal()
+      .domain(topGenres)
+      .range(d3$1.schemeCategory10);
+
+    // console.log(max(Object.values(totalPlaysArtist)))
     playScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
   		.domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
     //console.log(colorScale.range())
     render();
   });
+
+  const onClickGenre = d => {
+    console.log('selected genre: ' + d);
+    selectedGenre = d;
+    render(); 
+  };
+
+  const onClickArtist = d => {
+    console.log('selected artist: ' + d);
+    selectedArtist = (d);
+    render(); 
+  };
 
   const render = () => {
   	treeG.call(treemap, {
@@ -432,12 +498,41 @@
       playScale
     });
 
-    areaG.call(scatterplot, {
-      byWeekPlaysGenre,
-      legend,
-      colorScale,
-      colorValue,
-      selectedArtist,
+    genreLegendG.call(colorLegend, {
+      colorScale: genreColorScale,
+      circleRadius: 5,
+      spacing: 15,
+      textOffset: 12,
+      backgroundRectWidth: 135,
+      onClick: onClickGenre,
+      selectedLegendItem: selectedGenre
+    });
+
+    artistLegendG.call(colorLegend, {
+      colorScale: artistColorScale,
+      circleRadius: 5,
+      spacing: 15,
+      textOffset: 12,
+      backgroundRectWidth: 135,
+      onClick: onClickArtist,
+      selectedLegendItem: selectedArtist
+    });
+
+    areaGenreG.call(stackedArea, {
+      dataToStack: byWeekPlaysGenre,
+      legend: topGenres,
+      colorScale: genreColorScale,
+      selectedLegendItem: selectedGenre,
+      innerWidth,
+      innerHeight,
+      circleRadius: 3
+    });
+
+    areaArtistG.call(stackedArea, {
+      dataToStack: byWeekPlaysArtist,
+      legend: topArtists,
+      colorScale: artistColorScale,
+      selectedLegendItem: selectedArtist,
       innerWidth,
       innerHeight,
       circleRadius: 3
