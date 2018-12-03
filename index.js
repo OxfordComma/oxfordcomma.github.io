@@ -56,11 +56,11 @@ const genreLegendG = areaGenreSvg.append('g')
 
 const areaArtistG = areaArtistSvg.append('g')
     .attr('transform', `translate(${175},${10})`);
-const artistLegendG = areaArtistSvg.append('g')
-  .attr('transform', `translate(${10},${10})`);
+const artistLegendG = treeSvg.append('g')
+  .attr('transform', `translate(${385},${270})`);
 
 const treeG = zoomG.append('g')
-    .attr('transform', `translate(800, 0) rotate(90)`);
+    .attr('transform', `translate(785, 0) rotate(90)`);
 
 // treeSvg.call(zoom().on('zoom', () => {
 //   zoomG.attr('transform', event.transform);

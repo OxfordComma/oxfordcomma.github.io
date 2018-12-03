@@ -122,7 +122,7 @@ export const stackedAreaHorizontal = (selection, props) => {
 
   var series = stack(dataToStack);
 
-  console.log(series)
+  // console.log(series)
 
   const areaGenerator = area()
     .x(d => {
