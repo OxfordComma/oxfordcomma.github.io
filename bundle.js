@@ -1,9 +1,17 @@
 (function (d3$1) {
   'use strict';
 
+  // import LastFM from 'last-fm';
+
   const loadData = url => {
-    //return csv(url).then(data => {
     return Promise.all([d3$1.csv(url), d3$1.json('data.json')]).then(data => {
+      // const lastfm = new LastFM('a66e2f168fdbcda137799a2c165678ee')
+
+      // lastfm.trackSearch({ q: 'the greatest' }, (err, data) => {
+      //   if (err) console.error(err)
+      //   else console.log(data)
+      // })
+
       const csvData = data[0];
       var jsonData = data[1];
       const startDate = new Date('2018-01-01');
@@ -19,8 +27,8 @@
       var byWeekPlaysGenre = [];
       var byWeekPlaysArtist = [];
       var weekDict = {};
-      const numArtists = 10;
-      const numGenres = 9;
+      const numArtists = 35;
+      const numGenres = 10;
 
       var genreHierarchy = d3$1.hierarchy(jsonData); 
       genreHierarchy.data = jsonData; 
@@ -144,86 +152,6 @@
     }).then(r => {return r;}); 
   };
 
-  const treemap = (selection, props) => {
-    const {
-      jsonData,
-      deepestGenresByArtist,
-      totalPlaysArtist,
-      innerWidth,
-      innerHeight,
-      playScale
-    } = props;
-
-    const treeWidth = 500;
-    const treeHeight = 2000;
-
-    var maxGenreDepth = 0;
-    
-    const treeLayout = d3$1.cluster()
-      .size([treeHeight, treeWidth])
-      .separation((a, b) => { 
-        return (a.parent == b.parent ? 0.7 : 1); 
-      });
-
-    const root = d3$1.hierarchy(jsonData);  
-    
-    root.descendants().forEach(d => {
-      const genre = d.data.id;
-      maxGenreDepth = d.depth > maxGenreDepth ? d.depth : maxGenreDepth;
-        Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
-        if (totalPlaysArtist[f] < 5)
-          return;
-
-        var newNode = d3$1.hierarchy({
-          id: f, 
-          artist: f, 
-          plays: totalPlaysArtist[f]
-        });
-        newNode.parent = d;  
-        if (d.children === undefined)
-          d.children = [];
-
-        d.children.push(newNode);
-      });
-    });
-    
-    root.sort((a,b) => {
-      var aLen = a.children === undefined ? -1 : a.children.length;
-      var bLen = b.children === undefined ? -1 : b.children.length;
-      return(bLen - aLen); 
-    });
-    
-    const tree = treeLayout(root);
-    const links = tree.links();    
-    const linkPathGenerator = d3$1.linkHorizontal()
-      .x(d => d.y)
-      .y(d => d.x);
-
-    const treeSpread = 20;
-
-    links.forEach(d => {
-      if (d.target.data.artist)
-        d.target.y = (maxGenreDepth + 1) * treeSpread;
-      else
-    		d.target.y = d.target.depth * treeSpread;
-    }); 
-
-    selection.selectAll('path').data(links)
-      .enter().append('path')
-        .attr('d', linkPathGenerator);
-
-    selection.selectAll('text').data(root.descendants()) 
-      .enter().append('text')
-        .attr('x', d => d.y)
-        .attr('y', d => d.x)
-        .attr('dy', '0.32em')
-        .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
-    		//.attr('font-size', d => d.children ? '1em' : '0.2em')
-    		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'white')
-        .attr('font-size', d => d.data.artist ? Math.log(d.data.plays) * 2 : '1.1em')
-        .text(d => d.data.id); 
-  };
-
   const colorLegend = (selection, props) => {
     const {
       colorScale,
@@ -289,15 +217,14 @@
 
   // Mouseover line adapted from here
 
-  const stackedArea = (selection, props) => {
+  const stackedAreaHorizontal = (selection, props) => {
     const {
       dataToStack,
       legend,
       colorScale,
       selectedLegendItem,
-      innerWidth,
-      innerHeight,
-      circleRadius
+      width,
+      height,
     } = props;
     
     const g = selection.selectAll('.container').data([null]);
@@ -307,23 +234,22 @@
    
     const xValue = d => d.week;
 
-
     const xAxisLabel = 'Week';
     const yAxisLabel = 'Plays'; 
     
     // X-axis and scale
-    console.log(new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1));
+    // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
     const xScale = d3$1.scaleTime()
       .domain([
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-      .range([0, innerWidth])
+      .range([0, width])
       .nice();
     
     const xAxis = d3$1.axisBottom(xScale)
-      .ticks(9)
-      .tickSize(-innerHeight)
-      .tickPadding(15)
+      // .ticks(9)
+      // .tickSize(-height)
+      // .tickPadding(15)
       .tickFormat(d3.timeFormat('%B'));
     
     // From https://vizhub.com/curran/501f3fe24cfb4e6785ac75008b530a83
@@ -334,13 +260,13 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-        .attr('transform', `translate(0,${innerHeight})`);
+        .attr('transform', `translate(0,${height})`);
         // .selectAll('.domain').remove()
     
     xAxisGEnter.append('text')
         .attr('class', 'axis-label')
         .attr('y', 50)
-        .attr('x', innerWidth / 2)
+        .attr('x', width / 2)
         .attr('fill', 'black')
         .text(xAxisLabel);
     
@@ -350,17 +276,13 @@
                // selectedLegendItem ? 
                // max(data.map(d => d[selectedLegendItem])) : 
                d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
-      .range([innerHeight, 0])
+      .range([height, 0])
       .nice();  
     
-    const yAxisTickFormat = number =>
-      d3$1.format('.2s')(number)
-        .replace('.0', '');
-    
-    const yAxis = d3$1.axisLeft(yScale)
-      .tickSize(-innerWidth)
-      .tickPadding(5)
-      .tickFormat(yAxisTickFormat);
+    const yAxis = d3$1.axisLeft(yScale);
+      // .tickSize(-width)
+      // .tickPadding(5)
+      // .tickFormat(yAxisTickFormat);
     
     const yAxisG = g.select('.y-axis');
     const yAxisGEnter = gEnter
@@ -378,7 +300,7 @@
     yAxisGEnter.append('text')
       .attr('class', 'axis-label')
       .attr('y', -35)
-      .attr('x', -innerHeight / 2)
+      .attr('x', -height / 2)
       .attr('fill', 'black')
       .attr('transform', `rotate(-90)`)
       .attr('text-anchor', 'middle')
@@ -386,16 +308,20 @@
     
     var stack = d3.stack(dataToStack)
       .keys(legend);
+      // .offset(d3.stackOffsetWiggle);
+
 
     var series = stack(dataToStack);
-    
+
+    console.log(series);
+
     const areaGenerator = d3$1.area()
       .x(d => {
         var toScale = new Date(2018, 0, (d.data.week - 1) * 7);
         // console.log(toScale)
         return xScale(toScale);
       })
-      .y0(d =>  yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
+      .y0(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
       .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
       .curve(d3$1.curveBasis);
     
@@ -413,13 +339,117 @@
         .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
   };
 
-  //Hack
-  const width = 960;
-  const height = 500;
+  // Mouseover line adapted from here
 
-  const margin = { top: 20, right: 0, bottom: 40, left: 20 };
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+  const stackedAreaVertical = (selection, props) => {
+    const {
+      dataToStack,
+      legend,
+      colorScale,
+      selectedLegendItem,
+      width,
+      height,
+    } = props;
+    
+    const g = selection.selectAll('.container').data([null]);
+    const gEnter = g.enter()
+      .append('g')
+        .attr('class', 'container');
+   
+    const xValue = d => d.week;
+    
+    // X-axis and scale
+    // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
+    // This converts from the week scale to a day scale
+    const xScale = d3$1.scaleTime()
+      .domain([
+        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
+        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
+      .range([0, width]);
+      // .nice()
+    
+    const yScale = d3$1.scaleLinear()
+      .domain([0, 
+               // selectedLegendItem ? 
+               // max(dataToStack.map(d => d[selectedLegendItem])) : 
+               d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
+      .range([height, 0])
+      .nice(); 
+    
+    const xAxis = d3$1.axisBottom(xScale)
+      // .ticks(9)
+      .tickSize(0)
+      // .tickPadding(15)
+      .tickFormat(d3.timeFormat('%B'));
+    
+    // From https://vizhub.com/curran/501f3fe24cfb4e6785ac75008b530a83
+    const xAxisG = g.select('.x-axis');
+    const xAxisGEnter = gEnter
+      .append('g').attr('class', 'x-axis');
+    
+    xAxisGEnter
+      .merge(xAxisG)
+        .call(xAxis)
+        .attr('transform', `translate(0,${1.45 * height})`)
+        .selectAll('text')
+          .attr('text-anchor', 'end')
+          .attr('transform', `rotate(-90)`);
+
+    xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
+    
+    const yAxis = d3$1.axisLeft(yScale)
+      .ticks('none');
+      // .tickSize(-width)
+      // .tickPadding(5)
+      // .tickFormat(yAxisTickFormat);
+    
+    const yAxisG = g.select('.y-axis');
+    const yAxisGEnter = gEnter
+      .append('g')
+        .attr('class', 'y-axis');
+    
+    yAxisGEnter
+      .merge(yAxisG)
+        .transition().duration(200)
+        .call(yAxis);
+    
+    yAxisGEnter.merge(yAxisG)
+        .selectAll('.domain').remove();
+    
+    // yAxisGEnter.append('text')
+    //   .attr('class', 'axis-label')
+    //   .attr('y', -35)
+    //   .attr('x', -height / 2)
+    //   .attr('fill', 'black')
+    //   .attr('transform', `rotate(-90)`)
+    //   .attr('text-anchor', 'middle')
+    //   .text(yAxisLabel);
+    
+    var stack = d3.stack(dataToStack)
+      .keys(legend)
+      .offset(d3.stackOffsetWiggle);
+
+    var series = stack(dataToStack);
+
+    const areaGenerator = d3$1.area()
+      .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+      .y0(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
+      .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
+      .curve(d3$1.curveBasis);
+    
+    const lines = selection.selectAll('.line-path').data(series);
+    const linesEnter = lines.enter().append('path')
+        .attr('class', 'line-path') 
+        .attr('fill', d => colorScale(d.key))
+        .attr('stroke', 'black');
+        
+    lines.merge(linesEnter)
+      .transition()
+        .duration(200)
+        .attr('d', areaGenerator)
+        .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
+        .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
+  };
 
   var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
   var artistColorScale, genreColorScale;
@@ -438,22 +468,22 @@
     .append('g');
 
   const areaGenreG = areaGenreSvg.append('g')
-      .attr('transform', `translate(${155},${10})`);
+      .attr('transform', `translate(${175},${10})`);
   const genreLegendG = areaGenreSvg.append('g')
     .attr('class', 'genre-legend')
     .attr('transform', `translate(${10},${10})`);
 
   const areaArtistG = areaArtistSvg.append('g')
-      .attr('transform', `translate(${155},${10})`);
+      .attr('transform', `translate(${175},${10})`);
   const artistLegendG = areaArtistSvg.append('g')
     .attr('transform', `translate(${10},${10})`);
 
-  const treeG = zoomG.append('g');
-      //.attr('transform', `translate(${margin.left},${margin.top})`);
+  const treeG = zoomG.append('g')
+      .attr('transform', `translate(800, 0) rotate(90)`);
 
-  treeSvg.call(d3$1.zoom().on('zoom', () => {
-    zoomG.attr('transform', d3$1.event.transform);
-  }));
+  // treeSvg.call(zoom().on('zoom', () => {
+  //   zoomG.attr('transform', event.transform);
+  // }));
 
   loadData('https://vizhub.com/OxfordComma/datasets/output-with-genre-2018.csv').then(data => {
     jsonData = data.jsonData;
@@ -493,13 +523,23 @@
   };
 
   const render = () => {
-  	treeG.call(treemap, {
-      jsonData,
-      deepestGenresByArtist,
-      totalPlaysArtist,
-      innerWidth,
-      innerHeight,
-      playScale
+  	// treeG.call(treemap, {
+   //    jsonData,
+   //    deepestGenresByArtist,
+   //    totalPlaysArtist,
+   //    innerWidth,
+   //    innerHeight,
+   //    playScale
+   //  });
+
+   treeG.call(stackedAreaVertical, {
+      dataToStack: byWeekPlaysArtist,
+      legend: topArtists,
+      colorScale: artistColorScale,
+      selectedLegendItem: selectedArtist,
+      width: 1960,
+      height: 500,
+      circleRadius: 3,
     });
 
     genreLegendG.call(colorLegend, {
@@ -522,24 +562,22 @@
       selectedLegendItem: selectedArtist
     });
 
-    areaGenreG.call(stackedArea, {
+    areaGenreG.call(stackedAreaHorizontal, {
       dataToStack: byWeekPlaysGenre,
       legend: topGenres,
       colorScale: genreColorScale,
       selectedLegendItem: selectedGenre,
-      innerWidth,
-      innerHeight,
-      circleRadius: 3
+      width: 960,
+      height: 500,
     });
 
-    areaArtistG.call(stackedArea, {
+    areaArtistG.call(stackedAreaHorizontal, {
       dataToStack: byWeekPlaysArtist,
       legend: topArtists,
       colorScale: artistColorScale,
       selectedLegendItem: selectedArtist,
-      innerWidth,
-      innerHeight,
-      circleRadius: 3
+      width: 960,
+      height: 500,
     });
   };
 

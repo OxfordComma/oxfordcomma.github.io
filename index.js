@@ -16,9 +16,10 @@ import {
   schemeSet3
 } from 'd3';
 import { loadData } from './loadData';
-import { treemap } from './tree/treemap';
-import { stackedArea } from './stackedArea/stackedArea';
-import { colorLegend } from './stackedArea/colorLegend';
+import { treemap } from './treemap';
+import { stackedAreaHorizontal } from './stackedAreaHorizontal';
+import { stackedAreaVertical } from './stackedAreaVertical'
+import { colorLegend } from './colorLegend';
 
 //Hack
 const width = 960;
@@ -48,22 +49,22 @@ const zoomG = treeSvg
   .append('g');
 
 const areaGenreG = areaGenreSvg.append('g')
-    .attr('transform', `translate(${155},${10})`);
+    .attr('transform', `translate(${175},${10})`);
 const genreLegendG = areaGenreSvg.append('g')
   .attr('class', 'genre-legend')
   .attr('transform', `translate(${10},${10})`);
 
 const areaArtistG = areaArtistSvg.append('g')
-    .attr('transform', `translate(${155},${10})`);
+    .attr('transform', `translate(${175},${10})`);
 const artistLegendG = areaArtistSvg.append('g')
   .attr('transform', `translate(${10},${10})`);
 
 const treeG = zoomG.append('g')
-    //.attr('transform', `translate(${margin.left},${margin.top})`);
+    .attr('transform', `translate(800, 0) rotate(90)`);
 
-treeSvg.call(zoom().on('zoom', () => {
-  zoomG.attr('transform', event.transform);
-}));
+// treeSvg.call(zoom().on('zoom', () => {
+//   zoomG.attr('transform', event.transform);
+// }));
 
 loadData('https://vizhub.com/OxfordComma/datasets/output-with-genre-2018.csv').then(data => {
   jsonData = data.jsonData;
@@ -103,13 +104,23 @@ const onClickArtist = d => {
 };
 
 const render = () => {
-	treeG.call(treemap, {
-    jsonData,
-    deepestGenresByArtist,
-    totalPlaysArtist,
-    innerWidth,
-    innerHeight,
-    playScale
+	// treeG.call(treemap, {
+ //    jsonData,
+ //    deepestGenresByArtist,
+ //    totalPlaysArtist,
+ //    innerWidth,
+ //    innerHeight,
+ //    playScale
+ //  });
+
+ treeG.call(stackedAreaVertical, {
+    dataToStack: byWeekPlaysArtist,
+    legend: topArtists,
+    colorScale: artistColorScale,
+    selectedLegendItem: selectedArtist,
+    width: 1960,
+    height: 500,
+    circleRadius: 3,
   });
 
   genreLegendG.call(colorLegend, {
@@ -132,23 +143,21 @@ const render = () => {
     selectedLegendItem: selectedArtist
   });
 
-  areaGenreG.call(stackedArea, {
+  areaGenreG.call(stackedAreaHorizontal, {
     dataToStack: byWeekPlaysGenre,
     legend: topGenres,
     colorScale: genreColorScale,
     selectedLegendItem: selectedGenre,
-    innerWidth,
-    innerHeight,
-    circleRadius: 3
+    width: 960,
+    height: 500,
   });
 
-  areaArtistG.call(stackedArea, {
+  areaArtistG.call(stackedAreaHorizontal, {
     dataToStack: byWeekPlaysArtist,
     legend: topArtists,
     colorScale: artistColorScale,
     selectedLegendItem: selectedArtist,
-    innerWidth,
-    innerHeight,
-    circleRadius: 3
+    width: 960,
+    height: 500,
   });
 }

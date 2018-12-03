@@ -58,5 +58,5 @@ export const colorLegend = (selection, props) => {
     .merge(groups.select('text'))   
       .text(d => d)
       .attr('dy', '0.32em')
-      .attr('x', textOffset);
+      .attr('x', textOffset)
 }

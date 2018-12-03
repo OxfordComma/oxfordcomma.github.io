@@ -1,8 +1,15 @@
 import { csv, hierarchy, json, nest } from 'd3';
+// import LastFM from 'last-fm';
 
 export const loadData = url => {
-  //return csv(url).then(data => {
   return Promise.all([csv(url), json('data.json')]).then(data => {
+    // const lastfm = new LastFM('a66e2f168fdbcda137799a2c165678ee')
+
+    // lastfm.trackSearch({ q: 'the greatest' }, (err, data) => {
+    //   if (err) console.error(err)
+    //   else console.log(data)
+    // })
+
     const csvData = data[0];
     var jsonData = data[1];
     const startDate = new Date('2018-01-01');
@@ -18,8 +25,8 @@ export const loadData = url => {
     var byWeekPlaysGenre = [];
     var byWeekPlaysArtist = [];
     var weekDict = {};
-    const numArtists = 10;
-    const numGenres = 9;
+    const numArtists = 35;
+    const numGenres = 10;
 
     // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
     const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout'];

@@ -17,19 +17,19 @@ import {
   stack,
   max,
   sum,
-  time
+  time,
+  stackOffsetWiggle
 } from 'd3';
 import { colorLegend } from './colorLegend';
 
-export const stackedArea = (selection, props) => {
+export const stackedAreaVertical = (selection, props) => {
   const {
     dataToStack,
     legend,
     colorScale,
     selectedLegendItem,
-    innerWidth,
-    innerHeight,
-    circleRadius
+    width,
+    height,
   } = props;
   
   const g = selection.selectAll('.container').data([null]);
@@ -39,23 +39,31 @@ export const stackedArea = (selection, props) => {
  
   const xValue = d => d.week;
 
-
   const xAxisLabel = 'Week';
-  const yAxisLabel = 'Plays'; 
+  const yAxisLabel = 'Plays';
   
   // X-axis and scale
-  console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
+  // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
+  // This converts from the week scale to a day scale
   const xScale = scaleTime()
     .domain([
       new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
       new Date(2018, 0, (extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-    .range([0, innerWidth])
-    .nice()
+    .range([0, width])
+    // .nice()
+  
+  const yScale = scaleLinear()
+    .domain([0, 
+             // selectedLegendItem ? 
+             // max(dataToStack.map(d => d[selectedLegendItem])) : 
+             max(dataToStack.map(d => sum(Object.values(d))))])
+    .range([height, 0])
+    .nice(); 
   
   const xAxis = axisBottom(xScale)
-    .ticks(9)
-    .tickSize(-innerHeight)
-    .tickPadding(15)
+    // .ticks(9)
+    .tickSize(0)
+    // .tickPadding(15)
     .tickFormat(d3.timeFormat('%B'));
   
   // From https://vizhub.com/curran/501f3fe24cfb4e6785ac75008b530a83
@@ -66,33 +74,30 @@ export const stackedArea = (selection, props) => {
   xAxisGEnter
     .merge(xAxisG)
       .call(xAxis)
-      .attr('transform', `translate(0,${innerHeight})`)
-      // .selectAll('.domain').remove()
+      .attr('transform', `translate(0,${1.45 * height})`)
+      .selectAll('text')
+        .attr('text-anchor', 'end')
+        .attr('transform', `rotate(-90)`);
+
+  xAxisGEnter.merge(xAxisG).selectAll('.domain').remove()
   
-  xAxisGEnter.append('text')
-      .attr('class', 'axis-label')
-      .attr('y', 50)
-      .attr('x', innerWidth / 2)
-      .attr('fill', 'black')
-      .text(xAxisLabel);
-  
-  // Y-axis and scale
-  const yScale = scaleLinear()
-    .domain([0, 
-             // selectedLegendItem ? 
-             // max(data.map(d => d[selectedLegendItem])) : 
-             max(dataToStack.map(d => sum(Object.values(d))))])
-    .range([innerHeight, 0])
-    .nice();  
-  
+  // xAxisGEnter.append('text')
+  //     .attr('class', 'axis-label')
+  //     .attr('transform', `rotate(90)`)
+  //     .attr('y', 50)
+  //     .attr('x', 0 / 2)
+  //     .attr('fill', 'black')
+  //     .text(xAxisLabel);
+ 
   const yAxisTickFormat = number =>
     format('.2s')(number)
       .replace('.0', '');
   
   const yAxis = axisLeft(yScale)
-    .tickSize(-innerWidth)
-    .tickPadding(5)
-    .tickFormat(yAxisTickFormat);
+    .ticks('none')
+    // .tickSize(-width)
+    // .tickPadding(5)
+    // .tickFormat(yAxisTickFormat);
   
   const yAxisG = g.select('.y-axis');
   const yAxisGEnter = gEnter
@@ -107,27 +112,24 @@ export const stackedArea = (selection, props) => {
   yAxisGEnter.merge(yAxisG)
       .selectAll('.domain').remove();
   
-  yAxisGEnter.append('text')
-    .attr('class', 'axis-label')
-    .attr('y', -35)
-    .attr('x', -innerHeight / 2)
-    .attr('fill', 'black')
-    .attr('transform', `rotate(-90)`)
-    .attr('text-anchor', 'middle')
-    .text(yAxisLabel);
+  // yAxisGEnter.append('text')
+  //   .attr('class', 'axis-label')
+  //   .attr('y', -35)
+  //   .attr('x', -height / 2)
+  //   .attr('fill', 'black')
+  //   .attr('transform', `rotate(-90)`)
+  //   .attr('text-anchor', 'middle')
+  //   .text(yAxisLabel);
   
   var stack = d3.stack(dataToStack)
-    .keys(legend);
+    .keys(legend)
+    .offset(d3.stackOffsetWiggle);
 
   var series = stack(dataToStack);
-  
+
   const areaGenerator = area()
-    .x(d => {
-      var toScale = new Date(2018, 0, (d.data.week - 1) * 7)
-      // console.log(toScale)
-      return xScale(toScale);
-    })
-    .y0(d =>  yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
+    .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+    .y0(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
     .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
     .curve(curveBasis);
   
