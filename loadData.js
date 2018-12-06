@@ -14,6 +14,7 @@ export const loadData = url => {
     var jsonData = data[1];
     const startDate = new Date('2018-01-01');
 
+    console.log(csvData)
     var sortedGenreList = [];
     var sortedArtistList = [];
     var totalPlaysArtist = {};

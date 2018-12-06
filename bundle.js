@@ -16,6 +16,7 @@
       var jsonData = data[1];
       const startDate = new Date('2018-01-01');
 
+      console.log(csvData);
       var sortedGenreList = [];
       var sortedArtistList = [];
       var totalPlaysArtist = {};
@@ -632,7 +633,7 @@
   //   zoomG.attr('transform', event.transform);
   // }));
 
-  loadData('https://vizhub.com/OxfordComma/datasets/output-with-genre-2018.csv').then(data => {
+  loadData('/Users/nick/oxfordcomma.github.io/output_12-5-18-10-45-41.csv').then(data => {
     jsonData = data.jsonData;
     artistData = data.artistData;
     byWeekPlaysGenre = data.byWeekPlaysGenre;
