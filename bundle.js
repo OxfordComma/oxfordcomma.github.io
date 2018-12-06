@@ -633,7 +633,7 @@
   //   zoomG.attr('transform', event.transform);
   // }));
 
-  loadData('/Users/nick/oxfordcomma.github.io/output_12-5-18-10-45-41.csv').then(data => {
+  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/output_12-5-18-10-45-41.csv').then(data => {
     jsonData = data.jsonData;
     artistData = data.artistData;
     byWeekPlaysGenre = data.byWeekPlaysGenre;
