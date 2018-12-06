@@ -450,7 +450,7 @@
         .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
         .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
 
-      const annotations = [
+    const annotations = [
     {
       note: {
         title: "Tiny Moving Parts and Mom Jeans",
@@ -582,11 +582,20 @@
       // .editMode(true)
       .notePadding(5);
 
-    d3.select(".tree")
+    var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
+    // annotationG.enter()
       .append("g")
       .attr("class", "annotation-group")
       .call(makeAnnotations);
   };
+
+  //Hack
+  // const width = 960;
+  // const height = 500;
+
+  // const margin = { top: 20, right: 0, bottom: 40, left: 20 };
+  // const innerWidth = width - margin.left - margin.right;
+  // const innerHeight = height - margin.top - margin.bottom;
 
   var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
   var artistColorScale, genreColorScale;
@@ -596,7 +605,7 @@
   var deepestGenresByArtist;
   // var genreLegendG, artistLegendG;
 
-  const treeSvg = d3$1.select('.tree');
+  const treeSvg = d3$1.select('.stacked-area-artist-vertical');
   const areaGenreSvg = d3$1.select('.stacked-area-genre');
   const areaArtistSvg = d3$1.select('.stacked-area-artist');
   const colorScale = d3$1.scaleOrdinal();
@@ -616,7 +625,8 @@
     .attr('transform', `translate(${385},${270})`);
 
   const treeG = zoomG.append('g')
-      .attr('transform', `translate(785, 0) rotate(90)`);
+    .attr('class', 'zoom')  
+    .attr('transform', `translate(785, 0), rotate(90)`);
 
   // treeSvg.call(zoom().on('zoom', () => {
   //   zoomG.attr('transform', event.transform);

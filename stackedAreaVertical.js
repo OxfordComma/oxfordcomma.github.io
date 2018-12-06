@@ -149,7 +149,7 @@ export const stackedAreaVertical = (selection, props) => {
       .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
       .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
 
-    const annotations = [
+  const annotations = [
   {
     note: {
       title: "Tiny Moving Parts and Mom Jeans",
@@ -281,7 +281,8 @@ export const stackedAreaVertical = (selection, props) => {
     // .editMode(true)
     .notePadding(5)
 
-  d3.select(".tree")
+  var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
+  // annotationG.enter()
     .append("g")
     .attr("class", "annotation-group")
     .call(makeAnnotations)

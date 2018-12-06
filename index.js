@@ -22,12 +22,12 @@ import { stackedAreaVertical } from './stackedAreaVertical'
 import { colorLegend } from './colorLegend';
 
 //Hack
-const width = 960;
-const height = 500;
+// const width = 960;
+// const height = 500;
 
-const margin = { top: 20, right: 0, bottom: 40, left: 20 };
-const innerWidth = width - margin.left - margin.right;
-const innerHeight = height - margin.top - margin.bottom;
+// const margin = { top: 20, right: 0, bottom: 40, left: 20 };
+// const innerWidth = width - margin.left - margin.right;
+// const innerHeight = height - margin.top - margin.bottom;
 
 var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
 var artistColorScale, genreColorScale;
@@ -38,7 +38,7 @@ var deepestGenresByArtist;
 var byWeekPlays;
 // var genreLegendG, artistLegendG;
 
-const treeSvg = select('.tree');
+const treeSvg = select('.stacked-area-artist-vertical');
 const areaGenreSvg = select('.stacked-area-genre');
 const areaArtistSvg = select('.stacked-area-artist');
 
@@ -60,7 +60,8 @@ const artistLegendG = treeSvg.append('g')
   .attr('transform', `translate(${385},${270})`);
 
 const treeG = zoomG.append('g')
-    .attr('transform', `translate(785, 0) rotate(90)`);
+  .attr('class', 'zoom')  
+  .attr('transform', `translate(785, 0), rotate(90)`);
 
 // treeSvg.call(zoom().on('zoom', () => {
 //   zoomG.attr('transform', event.transform);
