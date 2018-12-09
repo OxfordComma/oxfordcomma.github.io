@@ -21,8 +21,8 @@ export const loadData = url => {
     var totalPlaysGenre = {};
     var deepestGenresByArtist = {};
     
-    var topGenres;
-    var topArtists;
+    var topGenres = [];
+    var topArtists = [];
     var byWeekPlaysGenre = [];
     var byWeekPlaysArtist = [];
     var weekDict = {};
@@ -52,9 +52,16 @@ export const loadData = url => {
         plays: 0,
       };  
     })
+
+    totalPlaysGenre['test'] = { 
+        depth: 0,
+        plays: 0,
+      }
         
     csvData.forEach(d => {
-      d.listen_date = new Date(d.listen_date);  
+      d.listen_date = new Date(d.listen_date);
+      // console.log(d)
+  
       if (d.genre === "")
         return;
       
@@ -62,11 +69,12 @@ export const loadData = url => {
       d.genre = d.genre
         .split(',')
         .map(g => g.replace(/ /g, ''))
-        .filter(g => Object.keys(totalPlaysGenre).includes(g))
+        // .filter(g => Object.keys(totalPlaysGenre).includes(g))
         .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
       
       if (d.genre.length == 0)
         return;
+
       
       // Convert time since Jan 1, 2018 from msec to # of weeks
       // 1000 msec/sec, 60 sec/min, 60 min/hr, 24 hr/day, 7 days/week, +1 so it starts on week 1
@@ -140,6 +148,7 @@ export const loadData = url => {
       byWeekPlaysGenre.push(genreObj); 
     });
     // topArtists.push('everything else');
+    console.log(topGenres)
     topGenres.push('everything else');
 
 

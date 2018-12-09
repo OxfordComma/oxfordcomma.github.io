@@ -28,15 +28,31 @@ while (True):
     # print(recent_tracks[len(recent_tracks)-1])
     print(len(total_tracks))
 
-to_csv = pd.DataFrame(columns=['artist', 'album', 'track', 'listen_date'])
+to_csv = pd.DataFrame(columns=['artist', 'album', 'track', 'listen_date', 'genre'])
+artist_genres = {}
+
+
 for index, t in enumerate(total_tracks):
+    artist_name = t.track.artist.name
+    if artist_name not in artist_genres:
+        genre_list = t.track.artist.get_top_tags(limit=10)
+        genres = [g.item.get_name() for g in genre_list]
+        artist_genres[artist_name] = genres
+    else:
+        genres = artist_genres[artist_name]
+
+    # artists[artist] = genre
     to_csv.loc[index] = {
-        'artist': t.track.artist.name,
+        'artist': artist_name,
         'album': t.album,
-        'track' : t.track.title,
-        'listen_date' : t.playback_date
+        'track': t.track.title,
+        'listen_date': t.playback_date,
+        'genre': genres
     }
     print(index)
+
+# for index, row in enumerate(to_csv):
+
 
 to_csv.to_csv('/Users/nick/Desktop/music data/output_12-5-18-10-45-41.csv', header=False, index=False)
 
