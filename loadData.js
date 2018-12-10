@@ -3,12 +3,6 @@ import { csv, hierarchy, json, nest } from 'd3';
 
 export const loadData = url => {
   return Promise.all([csv(url), json('data.json')]).then(data => {
-    // const lastfm = new LastFM('a66e2f168fdbcda137799a2c165678ee')
-
-    // lastfm.trackSearch({ q: 'the greatest' }, (err, data) => {
-    //   if (err) console.error(err)
-    //   else console.log(data)
-    // })
 
     const csvData = data[0];
     var jsonData = data[1];
@@ -60,13 +54,15 @@ export const loadData = url => {
         
     csvData.forEach(d => {
       d.listen_date = new Date(d.listen_date);
-      // console.log(d)
+      console.log(d)
   
       if (d.genre === "")
         return;
-      
+
+      console.log(d.genre.replace(/[[\]]/g, '').split(','))
       // Sorted from deepest to shallowest genre
       d.genre = d.genre
+        .replace(/[[\]]/g, '')
         .split(',')
         .map(g => g.replace(/ /g, ''))
         // .filter(g => Object.keys(totalPlaysGenre).includes(g))
