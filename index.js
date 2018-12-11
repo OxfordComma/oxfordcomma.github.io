@@ -33,7 +33,8 @@ var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
 var artistColorScale, genreColorScale;
 var topArtists, topGenres;
 var playScale;
-var selectedArtist, selectedGenre;
+var selectedArtists = []; 
+var selectedGenre;
 var deepestGenresByArtist;
 var byWeekPlays;
 // var genreLegendG, artistLegendG;
@@ -46,8 +47,7 @@ const colorValue = d => d.artist;
 const colorScale = scaleOrdinal();
 
 const verticalAreaG = verticalAreaSvg.append('g')
-  // .attr('class', 'zoom')  
-  .attr('transform', `translate(${500}, 0), rotate(90)`);
+  .attr('transform', `translate(${250}, 0), rotate(90)`);
 
 const areaGenreG = areaGenreSvg.append('g')
     .attr('transform', `translate(${175},${10})`);
@@ -58,14 +58,9 @@ const genreLegendG = areaGenreSvg.append('g')
 const areaArtistG = areaArtistSvg.append('g')
     .attr('transform', `translate(${175},${10})`);
 const artistLegendG = verticalAreaSvg.append('g')
-  .attr('transform', `translate(${385},${270})`);
+  .attr('class', 'legend')
+  .attr('transform', `translate(${5},${20})`)
 
-// const verticalAreaG = zoomG.append('g')
-  
-
-// verticalAreaSvg.call(zoom().on('zoom', () => {
-//   zoomG.attr('transform', event.transform);
-// }));
 
 loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/output_12-5-18-10-45-41.csv').then(data => {
   jsonData = data.jsonData;
@@ -99,8 +94,19 @@ const onClickGenre = d => {
 };
 
 const onClickArtist = d => {
-  console.log('selected artist: ' + d);
-  selectedArtist = (d);
+  console.log(d)
+  if (!selectedArtists.includes(d))
+    selectedArtists.push(d);
+  else
+  {
+    console.log('butt')
+    selectedArtists = selectedArtists.filter(val => 
+      {
+        console.log(val)
+        return val != d;
+      })
+  }
+  console.log(selectedArtists)
   render(); 
 };
 
@@ -118,7 +124,7 @@ const render = () => {
     dataToStack: byWeekPlaysArtist,
     legend: topArtists,
     colorScale: artistColorScale,
-    selectedLegendItem: selectedArtist,
+    selectedLegendList: selectedArtists,
     width: 500,
     height: 2000,
   });
@@ -140,7 +146,7 @@ const render = () => {
     textOffset: 12,
     backgroundRectWidth: 135,
     onClick: onClickArtist,
-    selectedLegendItem: selectedArtist
+    selectedLegendList: selectedArtists
   });
 
   areaGenreG.call(stackedAreaHorizontal, {
@@ -156,7 +162,7 @@ const render = () => {
     dataToStack: byWeekPlaysArtist,
     legend: topArtists,
     colorScale: artistColorScale,
-    selectedLegendItem: selectedArtist,
+    selectedLegendItem: selectedArtists,
     width: 960,
     height: 500,
   });

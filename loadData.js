@@ -141,7 +141,7 @@ export const loadData = url => {
       byWeekPlaysGenre.push(genreObj); 
     });
     // topArtists.push('everything else');
-    console.log(topGenres)
+    // console.log(topGenres)
     topGenres.push('everything else');
 
 

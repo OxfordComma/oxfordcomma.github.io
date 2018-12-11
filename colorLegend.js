@@ -6,7 +6,7 @@ export const colorLegend = (selection, props) => {
     textOffset,
     backgroundRectWidth,
     onClick,
-    selectedLegendItem
+    selectedLegendList
   } = props;      
 
   const backgroundRect = selection.selectAll('rect')
@@ -34,8 +34,7 @@ export const colorLegend = (selection, props) => {
   groupsEnter
     .merge(groups)
       .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
-      .on('click', d => onClick(
-        d === selectedLegendItem ? null : d));
+      .on('click', onClick);
       
   groupsEnter
     .merge(groups)
@@ -44,7 +43,7 @@ export const colorLegend = (selection, props) => {
       .attr('opacity', d =>
       {
         // console.log(!selectedLegendItem);
-        return (!selectedLegendItem || d === selectedLegendItem) ? 1 : 0.2;
+        return (selectedLegendList.length == 0 || selectedLegendList.includes(d)) ? 1 : 0.2;
       })
 
   groups.exit().remove();

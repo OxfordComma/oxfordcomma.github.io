@@ -28,14 +28,13 @@ export const stackedAreaVertical = (selection, props) => {
     dataToStack,
     legend,
     colorScale,
-    selectedLegendItem,
+    selectedLegendList,
     width,
     height,
   } = props;
 
-  const margin = {left: 0, right: 0}
-
-  console.log(selection.attr('viewbox'))
+  const margin = {left: 175, right: 25}
+  const innerWidth = width - margin.left - margin.right
 
   const g = selection.selectAll('.container').data([null]);
   const gEnter = g.enter()
@@ -62,7 +61,7 @@ export const stackedAreaVertical = (selection, props) => {
              // selectedLegendItem ? 
              // max(dataToStack.map(d => d[selectedLegendItem])) : 
              max(dataToStack.map(d => sum(Object.values(d))))])
-    .range([0, width])
+    .range([0, innerWidth])
     .nice(); 
   
   const xAxis = axisBottom(xScale)
@@ -79,7 +78,7 @@ export const stackedAreaVertical = (selection, props) => {
   xAxisGEnter
     .merge(xAxisG)
       .call(xAxis)
-      .attr('transform', `translate(0,${0})`)
+      .attr('transform', `translate(0,${-250})`)
       .selectAll('text')
         .attr('text-anchor', 'end')
         .attr('transform', `rotate(-90)`);
@@ -130,11 +129,11 @@ export const stackedAreaVertical = (selection, props) => {
     .offset(d3.stackOffsetWiggle);
 
   var series = stack(dataToStack);
-  console.log(series)
+  // console.log(series)
   const areaGenerator = area()
     .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
-    .y0(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
-    .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
+    .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
+    .y1(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? d[1] - d[0] : d[1]))
     .curve(curveBasis);
   
   const lastYValue = d =>
@@ -150,13 +149,47 @@ export const stackedAreaVertical = (selection, props) => {
     .transition()
       .duration(200)
       .attr('d', areaGenerator)
-      .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
-      .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
+      .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
+      .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0 : 0);
 
-  csv('concert_dates.csv').then(data => console.log(data));
-
-  const annotations = [
+  // console.log(document.getElementById('legend'));
+  const annotations = []
+  csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => 
   {
+    annotationData.forEach(a => {
+      a.date = new Date(a.date)
+      annotations.push({
+        note: {
+          title: a.artists,
+          label: a.date.getMonth() + ' ' + a.date.getDate() + ' at ' + a.venue
+        },
+        x: 400,
+        y: 200, 
+        dx: 0,
+        dy: 0,
+        connector: {
+          curve: d3.curveLinear,
+          points: [[-50, 0]]
+        }
+      })
+    });
+    // console.log(annotations);
+  //   annotations.map(function(d){ d.color = "#8a2d96"; return d});
+  //   const makeAnnotations = d3.annotation()
+  //     .type(d3.annotationCalloutCurve)
+  //     .annotations(annotations)
+  //     // .editMode(true)
+  //     .notePadding(5)
+
+  //   var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
+  //   // annotationG.enter()
+  //     .append("g")
+  //     .attr("class", "annotation-group")
+  //     .call(makeAnnotations)
+  });
+
+  // const annotations = [
+  // {
   //   note: {
   //     title: "Tiny Moving Parts and Mom Jeans",
   //     label: "February 10th at the Sinclair"
@@ -279,17 +312,5 @@ export const stackedAreaVertical = (selection, props) => {
   //     curve: d3.curveLinear,
   //     points: [[-50, 0]]
   //   }
-  }].map(function(d){ d.color = "#8a2d96"; return d})
-
-  const makeAnnotations = d3.annotation()
-    .type(d3.annotationCalloutCurve)
-    .annotations(annotations)
-    // .editMode(true)
-    .notePadding(5)
-
-  var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
-  // annotationG.enter()
-    .append("g")
-    .attr("class", "annotation-group")
-    .call(makeAnnotations)
+  // }].map(function(d){ d.color = "#8a2d96"; return d})
 };

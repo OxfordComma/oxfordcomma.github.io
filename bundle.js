@@ -136,7 +136,7 @@
         byWeekPlaysGenre.push(genreObj); 
       });
       // topArtists.push('everything else');
-      console.log(topGenres);
+      // console.log(topGenres)
       topGenres.push('everything else');
 
 
@@ -163,7 +163,7 @@
       textOffset,
       backgroundRectWidth,
       onClick,
-      selectedLegendItem
+      selectedLegendList
     } = props;      
 
     const backgroundRect = selection.selectAll('rect')
@@ -191,8 +191,7 @@
     groupsEnter
       .merge(groups)
         .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
-        .on('click', d => onClick(
-          d === selectedLegendItem ? null : d));
+        .on('click', onClick);
         
     groupsEnter
       .merge(groups)
@@ -201,7 +200,7 @@
         .attr('opacity', d =>
         {
           // console.log(!selectedLegendItem);
-          return (!selectedLegendItem || d === selectedLegendItem) ? 1 : 0.2;
+          return (selectedLegendList.length == 0 || selectedLegendList.includes(d)) ? 1 : 0.2;
         });
 
     groups.exit().remove();
@@ -349,12 +348,13 @@
       dataToStack,
       legend,
       colorScale,
-      selectedLegendItem,
+      selectedLegendList,
       width,
       height,
     } = props;
 
-    console.log(selection.attr('viewbox'));
+    const margin = {left: 175, right: 25};
+    const innerWidth = width - margin.left - margin.right;
 
     const g = selection.selectAll('.container').data([null]);
     const gEnter = g.enter()
@@ -378,7 +378,7 @@
                // selectedLegendItem ? 
                // max(dataToStack.map(d => d[selectedLegendItem])) : 
                d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
-      .range([0, width])
+      .range([0, innerWidth])
       .nice(); 
     
     const xAxis = d3$1.axisBottom(xScale)
@@ -395,7 +395,7 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-        .attr('transform', `translate(0,${0})`)
+        .attr('transform', `translate(0,${-250})`)
         .selectAll('text')
           .attr('text-anchor', 'end')
           .attr('transform', `rotate(-90)`);
@@ -434,11 +434,11 @@
       .offset(d3.stackOffsetWiggle);
 
     var series = stack(dataToStack);
-    console.log(series);
+    // console.log(series)
     const areaGenerator = d3$1.area()
       .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
-      .y0(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
-      .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
+      .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
+      .y1(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? d[1] - d[0] : d[1]))
       .curve(d3$1.curveBasis);
     
     const lines = selection.selectAll('.line-path').data(series);
@@ -451,13 +451,47 @@
       .transition()
         .duration(200)
         .attr('d', areaGenerator)
-        .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
-        .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
+        .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
+        .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0 : 0);
 
-    d3$1.csv('concert_dates.csv').then(data => console.log(data));
-
-    const annotations = [
+    // console.log(document.getElementById('legend'));
+    const annotations = [];
+    d3$1.csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => 
     {
+      annotationData.forEach(a => {
+        a.date = new Date(a.date);
+        annotations.push({
+          note: {
+            title: a.artists,
+            label: a.date.getMonth() + ' ' + a.date.getDate() + ' at ' + a.venue
+          },
+          x: 400,
+          y: 200, 
+          dx: 0,
+          dy: 0,
+          connector: {
+            curve: d3.curveLinear,
+            points: [[-50, 0]]
+          }
+        });
+      });
+      // console.log(annotations);
+    //   annotations.map(function(d){ d.color = "#8a2d96"; return d});
+    //   const makeAnnotations = d3.annotation()
+    //     .type(d3.annotationCalloutCurve)
+    //     .annotations(annotations)
+    //     // .editMode(true)
+    //     .notePadding(5)
+
+    //   var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
+    //   // annotationG.enter()
+    //     .append("g")
+    //     .attr("class", "annotation-group")
+    //     .call(makeAnnotations)
+    });
+
+    // const annotations = [
+    // {
     //   note: {
     //     title: "Tiny Moving Parts and Mom Jeans",
     //     label: "February 10th at the Sinclair"
@@ -580,19 +614,7 @@
     //     curve: d3.curveLinear,
     //     points: [[-50, 0]]
     //   }
-    }].map(function(d){ d.color = "#8a2d96"; return d});
-
-    const makeAnnotations = d3.annotation()
-      .type(d3.annotationCalloutCurve)
-      .annotations(annotations)
-      // .editMode(true)
-      .notePadding(5);
-
-    var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
-    // annotationG.enter()
-      .append("g")
-      .attr("class", "annotation-group")
-      .call(makeAnnotations);
+    // }].map(function(d){ d.color = "#8a2d96"; return d})
   };
 
   //Hack
@@ -607,7 +629,8 @@
   var artistColorScale, genreColorScale;
   var topArtists, topGenres;
   var playScale;
-  var selectedArtist, selectedGenre;
+  var selectedArtists = []; 
+  var selectedGenre;
   var deepestGenresByArtist;
   // var genreLegendG, artistLegendG;
 
@@ -617,8 +640,7 @@
   const colorScale = d3$1.scaleOrdinal();
 
   const verticalAreaG = verticalAreaSvg.append('g')
-    // .attr('class', 'zoom')  
-    .attr('transform', `translate(${500}, 0), rotate(90)`);
+    .attr('transform', `translate(${250}, 0), rotate(90)`);
 
   const areaGenreG = areaGenreSvg.append('g')
       .attr('transform', `translate(${175},${10})`);
@@ -629,14 +651,9 @@
   const areaArtistG = areaArtistSvg.append('g')
       .attr('transform', `translate(${175},${10})`);
   const artistLegendG = verticalAreaSvg.append('g')
-    .attr('transform', `translate(${385},${270})`);
+    .attr('class', 'legend')
+    .attr('transform', `translate(${5},${20})`);
 
-  // const verticalAreaG = zoomG.append('g')
-    
-
-  // verticalAreaSvg.call(zoom().on('zoom', () => {
-  //   zoomG.attr('transform', event.transform);
-  // }));
 
   loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/output_12-5-18-10-45-41.csv').then(data => {
     jsonData = data.jsonData;
@@ -670,8 +687,19 @@
   };
 
   const onClickArtist = d => {
-    console.log('selected artist: ' + d);
-    selectedArtist = (d);
+    console.log(d);
+    if (!selectedArtists.includes(d))
+      selectedArtists.push(d);
+    else
+    {
+      console.log('butt');
+      selectedArtists = selectedArtists.filter(val => 
+        {
+          console.log(val);
+          return val != d;
+        });
+    }
+    console.log(selectedArtists);
     render(); 
   };
 
@@ -689,7 +717,7 @@
       dataToStack: byWeekPlaysArtist,
       legend: topArtists,
       colorScale: artistColorScale,
-      selectedLegendItem: selectedArtist,
+      selectedLegendList: selectedArtists,
       width: 500,
       height: 2000,
     });
@@ -711,7 +739,7 @@
       textOffset: 12,
       backgroundRectWidth: 135,
       onClick: onClickArtist,
-      selectedLegendItem: selectedArtist
+      selectedLegendList: selectedArtists
     });
 
     areaGenreG.call(stackedAreaHorizontal, {
@@ -727,7 +755,7 @@
       dataToStack: byWeekPlaysArtist,
       legend: topArtists,
       colorScale: artistColorScale,
-      selectedLegendItem: selectedArtist,
+      selectedLegendItem: selectedArtists,
       width: 960,
       height: 500,
     });
