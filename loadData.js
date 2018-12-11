@@ -47,31 +47,28 @@ export const loadData = url => {
       };  
     })
 
-    totalPlaysGenre['test'] = { 
-        depth: 0,
-        plays: 0,
-      }
+    // totalPlaysGenre['test'] = { 
+    //     depth: 0,
+    //     plays: 0,
+    //   }
         
     csvData.forEach(d => {
       d.listen_date = new Date(d.listen_date);
-      console.log(d)
   
       if (d.genre === "")
         return;
 
-      console.log(d.genre.replace(/[[\]]/g, '').split(','))
       // Sorted from deepest to shallowest genre
       d.genre = d.genre
         .replace(/[[\]]/g, '')
         .split(',')
         .map(g => g.replace(/ /g, ''))
         // .filter(g => Object.keys(totalPlaysGenre).includes(g))
-        .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
+        // .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
       
       if (d.genre.length == 0)
         return;
 
-      
       // Convert time since Jan 1, 2018 from msec to # of weeks
       // 1000 msec/sec, 60 sec/min, 60 min/hr, 24 hr/day, 7 days/week, +1 so it starts on week 1
       d.weekNum = (parseInt((d.listen_date - startDate)/1000/60/60/24/7 + 1));
@@ -83,13 +80,13 @@ export const loadData = url => {
       else
         totalPlaysArtist[d.artist] += 1;
       
-      if (totalPlaysGenre[d.genre[0]] === undefined)
-        totalPlaysGenre[d.genre[0]].plays = 1;
-      else
-        totalPlaysGenre[d.genre[0]].plays += 1;
+      // if (totalPlaysGenre[d.genre[0]] === undefined)
+      //   totalPlaysGenre[d.genre[0]].plays = 1;
+      // else
+      //   totalPlaysGenre[d.genre[0]].plays += 1;
 
-      if (deepestGenresByArtist[d.artist] === undefined)
-        deepestGenresByArtist[d.artist] = d.genre[0];
+      // if (deepestGenresByArtist[d.artist] === undefined)
+      //   deepestGenresByArtist[d.artist] = d.genre[0];
       
       if (weekDict[d.weekNum] === undefined)
         weekDict[d.weekNum] = {artists: {}, genres: {}};

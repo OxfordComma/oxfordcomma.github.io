@@ -18,7 +18,8 @@ import {
   max,
   sum,
   time,
-  stackOffsetWiggle
+  stackOffsetWiggle,
+  csv
 } from 'd3';
 import { colorLegend } from './colorLegend';
 
@@ -31,6 +32,10 @@ export const stackedAreaVertical = (selection, props) => {
     width,
     height,
   } = props;
+
+  const margin = {left: 0, right: 0}
+
+  console.log(selection.attr('viewbox'))
 
   const g = selection.selectAll('.container').data([null]);
   const gEnter = g.enter()
@@ -49,7 +54,7 @@ export const stackedAreaVertical = (selection, props) => {
     .domain([
       new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
       new Date(2018, 0, (extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-    .range([0, width])
+    .range([0, height])
     // .nice()
   
   const yScale = scaleLinear()
@@ -57,7 +62,7 @@ export const stackedAreaVertical = (selection, props) => {
              // selectedLegendItem ? 
              // max(dataToStack.map(d => d[selectedLegendItem])) : 
              max(dataToStack.map(d => sum(Object.values(d))))])
-    .range([height, 0])
+    .range([0, width])
     .nice(); 
   
   const xAxis = axisBottom(xScale)
@@ -74,9 +79,9 @@ export const stackedAreaVertical = (selection, props) => {
   xAxisGEnter
     .merge(xAxisG)
       .call(xAxis)
-      .attr('transform', `translate(0,${785})`)
+      .attr('transform', `translate(0,${0})`)
       .selectAll('text')
-        .attr('text-anchor', 'start')
+        .attr('text-anchor', 'end')
         .attr('transform', `rotate(-90)`);
 
   xAxisGEnter.merge(xAxisG).selectAll('.domain').remove()
@@ -109,8 +114,7 @@ export const stackedAreaVertical = (selection, props) => {
       .transition().duration(200)
       .call(yAxis);
   
-  yAxisGEnter.merge(yAxisG)
-      .selectAll('.domain').remove();
+  yAxisGEnter.merge(yAxisG).selectAll('.domain').remove();
   
   // yAxisGEnter.append('text')
   //   .attr('class', 'axis-label')
@@ -149,130 +153,132 @@ export const stackedAreaVertical = (selection, props) => {
       .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
       .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
 
+  csv('concert_dates.csv').then(data => console.log(data));
+
   const annotations = [
   {
-    note: {
-      title: "Tiny Moving Parts and Mom Jeans",
-      label: "February 10th at the Sinclair"
-    },
-    x: 230, y: xScale(new Date('10-Feb-2018')), dy: 65, dx: -117, 
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  }, 
-  {
-    note: {
-      title: "Sorority Noise",
-      label: "April 4th at the Paradise Rock Club"
-    },
-    x: 160, y: xScale(new Date('4-Apr-2018')), dy: -50, dx: -65,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-25, 0]]
-    }
-  },
-  {
-    note: {
-      title: "Lord Huron",
-      label: "April 30th at the House of  Blues"
-    },
-    x: 220, y: xScale(new Date('30-Apr-2018')), dy: -50, dx: -115,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-75, 0]]
-    }
-  },   
-  {
-    note: {
-      title: "The Killers, The National, and Julien Baker",
-      label: "May 23rd-25th at Boston Calling"
-    },
-    x: 120, y: xScale(new Date('24-May-2018')), dy: -50, dx: -15,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  },   
+  //   note: {
+  //     title: "Tiny Moving Parts and Mom Jeans",
+  //     label: "February 10th at the Sinclair"
+  //   },
+  //   x: 230, y: xScale(new Date('10-Feb-2018')), dy: 65, dx: -117, 
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
+  // }, 
   // {
   //   note: {
-  //     title: "The National",
-  //     label: "May 24th at Boston Calling"
+  //     title: "Sorority Noise",
+  //     label: "April 4th at the Paradise Rock Club"
   //   },
-  //   x: 210, y: 1200, dy: 0, dx: -150
+  //   x: 160, y: xScale(new Date('4-Apr-2018')), dy: -50, dx: -65,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-25, 0]]
+  //   }
+  // },
+  // {
+  //   note: {
+  //     title: "Lord Huron",
+  //     label: "April 30th at the House of  Blues"
+  //   },
+  //   x: 220, y: xScale(new Date('30-Apr-2018')), dy: -50, dx: -115,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-75, 0]]
+  //   }
   // },   
   // {
   //   note: {
-  //     title: "Julien Baker",
-  //     label: "May 25th at Boston Calling"
+  //     title: "The Killers, The National, and Julien Baker",
+  //     label: "May 23rd-25th at Boston Calling"
   //   },
-  //   x: 210, y: 1250, dy: 0, dx: -150
+  //   x: 120, y: xScale(new Date('24-May-2018')), dy: -50, dx: -15,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
   // },   
-  {
-    note: {
-      title: "Japanese Breakfast",
-      label: "June 1st at the Sinclair"
-    },
-    x: 150, y: xScale(new Date('1-Jun-2018')), dy: 30, dx: -32,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  },   
-  {
-    note: {
-      title: "Bon Iver",
-      label: "August 5th at the LA Bowl"
-    },
-    x: 230, y: xScale(new Date('5-Aug-2018')), dy: 70, dx: -125,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  },   
-  {
-    note: {
-      title: "Mitski",
-      label: "October 20th at the House of Blues"
-    },
-    x: 210, y: 2150, dy: 0, dx: -150,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  },   
-  {
-    note: {
-      title: "Mom Jeans (again)",
-      label: "November 1st at the ONCE Ballroom"
-    },
-    x: 210, y: 2350, dy: 0, dx: -150,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  }, 
-  {
-    note: {
-      title: "Pinegrove",
-      label: "November 24th at the Sinclair"
-    },
-    x: 210, y: 2500, dy: 0, dx: -150,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
-  },
-  {
-    note: {
-      title: "Tiny Moving Parts (again)",
-      label: "November 25th at the House of Blues"
-    },
-    x: 210, y: 2750, dy: 0, dx: -150,
-    connector: {
-      curve: d3.curveLinear,
-      points: [[-50, 0]]
-    }
+  // // {
+  // //   note: {
+  // //     title: "The National",
+  // //     label: "May 24th at Boston Calling"
+  // //   },
+  // //   x: 210, y: 1200, dy: 0, dx: -150
+  // // },   
+  // // {
+  // //   note: {
+  // //     title: "Julien Baker",
+  // //     label: "May 25th at Boston Calling"
+  // //   },
+  // //   x: 210, y: 1250, dy: 0, dx: -150
+  // // },   
+  // {
+  //   note: {
+  //     title: "Japanese Breakfast",
+  //     label: "June 1st at the Sinclair"
+  //   },
+  //   x: 150, y: xScale(new Date('1-Jun-2018')), dy: 30, dx: -32,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
+  // },   
+  // {
+  //   note: {
+  //     title: "Bon Iver",
+  //     label: "August 5th at the LA Bowl"
+  //   },
+  //   x: 230, y: xScale(new Date('5-Aug-2018')), dy: 70, dx: -125,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
+  // },   
+  // {
+  //   note: {
+  //     title: "Mitski",
+  //     label: "October 20th at the House of Blues"
+  //   },
+  //   x: 210, y: 2150, dy: 0, dx: -150,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
+  // },   
+  // {
+  //   note: {
+  //     title: "Mom Jeans (again)",
+  //     label: "November 1st at the ONCE Ballroom"
+  //   },
+  //   x: 210, y: 2350, dy: 0, dx: -150,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
+  // }, 
+  // {
+  //   note: {
+  //     title: "Pinegrove",
+  //     label: "November 24th at the Sinclair"
+  //   },
+  //   x: 210, y: 2500, dy: 0, dx: -150,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
+  // },
+  // {
+  //   note: {
+  //     title: "Tiny Moving Parts (again)",
+  //     label: "November 25th at the House of Blues"
+  //   },
+  //   x: 210, y: 2750, dy: 0, dx: -150,
+  //   connector: {
+  //     curve: d3.curveLinear,
+  //     points: [[-50, 0]]
+  //   }
   }].map(function(d){ d.color = "#8a2d96"; return d})
 
   const makeAnnotations = d3.annotation()

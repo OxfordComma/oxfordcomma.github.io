@@ -43,31 +43,28 @@
         };  
       });
 
-      totalPlaysGenre['test'] = { 
-          depth: 0,
-          plays: 0,
-        };
+      // totalPlaysGenre['test'] = { 
+      //     depth: 0,
+      //     plays: 0,
+      //   }
           
       csvData.forEach(d => {
         d.listen_date = new Date(d.listen_date);
-        console.log(d);
     
         if (d.genre === "")
           return;
 
-        console.log(d.genre.replace(/[[\]]/g, '').split(','));
         // Sorted from deepest to shallowest genre
         d.genre = d.genre
           .replace(/[[\]]/g, '')
           .split(',')
-          .map(g => g.replace(/ /g, ''))
+          .map(g => g.replace(/ /g, ''));
           // .filter(g => Object.keys(totalPlaysGenre).includes(g))
-          .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
+          // .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
         
         if (d.genre.length == 0)
           return;
 
-        
         // Convert time since Jan 1, 2018 from msec to # of weeks
         // 1000 msec/sec, 60 sec/min, 60 min/hr, 24 hr/day, 7 days/week, +1 so it starts on week 1
         d.weekNum = (parseInt((d.listen_date - startDate)/1000/60/60/24/7 + 1));
@@ -79,13 +76,13 @@
         else
           totalPlaysArtist[d.artist] += 1;
         
-        if (totalPlaysGenre[d.genre[0]] === undefined)
-          totalPlaysGenre[d.genre[0]].plays = 1;
-        else
-          totalPlaysGenre[d.genre[0]].plays += 1;
+        // if (totalPlaysGenre[d.genre[0]] === undefined)
+        //   totalPlaysGenre[d.genre[0]].plays = 1;
+        // else
+        //   totalPlaysGenre[d.genre[0]].plays += 1;
 
-        if (deepestGenresByArtist[d.artist] === undefined)
-          deepestGenresByArtist[d.artist] = d.genre[0];
+        // if (deepestGenresByArtist[d.artist] === undefined)
+        //   deepestGenresByArtist[d.artist] = d.genre[0];
         
         if (weekDict[d.weekNum] === undefined)
           weekDict[d.weekNum] = {artists: {}, genres: {}};
@@ -357,6 +354,8 @@
       height,
     } = props;
 
+    console.log(selection.attr('viewbox'));
+
     const g = selection.selectAll('.container').data([null]);
     const gEnter = g.enter()
       .append('g')
@@ -371,7 +370,7 @@
       .domain([
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-      .range([0, width]);
+      .range([0, height]);
       // .nice()
     
     const yScale = d3$1.scaleLinear()
@@ -379,7 +378,7 @@
                // selectedLegendItem ? 
                // max(dataToStack.map(d => d[selectedLegendItem])) : 
                d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
-      .range([height, 0])
+      .range([0, width])
       .nice(); 
     
     const xAxis = d3$1.axisBottom(xScale)
@@ -396,9 +395,9 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-        .attr('transform', `translate(0,${785})`)
+        .attr('transform', `translate(0,${0})`)
         .selectAll('text')
-          .attr('text-anchor', 'start')
+          .attr('text-anchor', 'end')
           .attr('transform', `rotate(-90)`);
 
     xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
@@ -419,8 +418,7 @@
         .transition().duration(200)
         .call(yAxis);
     
-    yAxisGEnter.merge(yAxisG)
-        .selectAll('.domain').remove();
+    yAxisGEnter.merge(yAxisG).selectAll('.domain').remove();
     
     // yAxisGEnter.append('text')
     //   .attr('class', 'axis-label')
@@ -456,130 +454,132 @@
         .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
         .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
 
+    d3$1.csv('concert_dates.csv').then(data => console.log(data));
+
     const annotations = [
     {
-      note: {
-        title: "Tiny Moving Parts and Mom Jeans",
-        label: "February 10th at the Sinclair"
-      },
-      x: 230, y: xScale(new Date('10-Feb-2018')), dy: 65, dx: -117, 
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    }, 
-    {
-      note: {
-        title: "Sorority Noise",
-        label: "April 4th at the Paradise Rock Club"
-      },
-      x: 160, y: xScale(new Date('4-Apr-2018')), dy: -50, dx: -65,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-25, 0]]
-      }
-    },
-    {
-      note: {
-        title: "Lord Huron",
-        label: "April 30th at the House of  Blues"
-      },
-      x: 220, y: xScale(new Date('30-Apr-2018')), dy: -50, dx: -115,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-75, 0]]
-      }
-    },   
-    {
-      note: {
-        title: "The Killers, The National, and Julien Baker",
-        label: "May 23rd-25th at Boston Calling"
-      },
-      x: 120, y: xScale(new Date('24-May-2018')), dy: -50, dx: -15,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    },   
+    //   note: {
+    //     title: "Tiny Moving Parts and Mom Jeans",
+    //     label: "February 10th at the Sinclair"
+    //   },
+    //   x: 230, y: xScale(new Date('10-Feb-2018')), dy: 65, dx: -117, 
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
+    // }, 
     // {
     //   note: {
-    //     title: "The National",
-    //     label: "May 24th at Boston Calling"
+    //     title: "Sorority Noise",
+    //     label: "April 4th at the Paradise Rock Club"
     //   },
-    //   x: 210, y: 1200, dy: 0, dx: -150
+    //   x: 160, y: xScale(new Date('4-Apr-2018')), dy: -50, dx: -65,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-25, 0]]
+    //   }
+    // },
+    // {
+    //   note: {
+    //     title: "Lord Huron",
+    //     label: "April 30th at the House of  Blues"
+    //   },
+    //   x: 220, y: xScale(new Date('30-Apr-2018')), dy: -50, dx: -115,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-75, 0]]
+    //   }
     // },   
     // {
     //   note: {
-    //     title: "Julien Baker",
-    //     label: "May 25th at Boston Calling"
+    //     title: "The Killers, The National, and Julien Baker",
+    //     label: "May 23rd-25th at Boston Calling"
     //   },
-    //   x: 210, y: 1250, dy: 0, dx: -150
+    //   x: 120, y: xScale(new Date('24-May-2018')), dy: -50, dx: -15,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
     // },   
-    {
-      note: {
-        title: "Japanese Breakfast",
-        label: "June 1st at the Sinclair"
-      },
-      x: 150, y: xScale(new Date('1-Jun-2018')), dy: 30, dx: -32,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    },   
-    {
-      note: {
-        title: "Bon Iver",
-        label: "August 5th at the LA Bowl"
-      },
-      x: 230, y: xScale(new Date('5-Aug-2018')), dy: 70, dx: -125,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    },   
-    {
-      note: {
-        title: "Mitski",
-        label: "October 20th at the House of Blues"
-      },
-      x: 210, y: 2150, dy: 0, dx: -150,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    },   
-    {
-      note: {
-        title: "Mom Jeans (again)",
-        label: "November 1st at the ONCE Ballroom"
-      },
-      x: 210, y: 2350, dy: 0, dx: -150,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    }, 
-    {
-      note: {
-        title: "Pinegrove",
-        label: "November 24th at the Sinclair"
-      },
-      x: 210, y: 2500, dy: 0, dx: -150,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
-    },
-    {
-      note: {
-        title: "Tiny Moving Parts (again)",
-        label: "November 25th at the House of Blues"
-      },
-      x: 210, y: 2750, dy: 0, dx: -150,
-      connector: {
-        curve: d3.curveLinear,
-        points: [[-50, 0]]
-      }
+    // // {
+    // //   note: {
+    // //     title: "The National",
+    // //     label: "May 24th at Boston Calling"
+    // //   },
+    // //   x: 210, y: 1200, dy: 0, dx: -150
+    // // },   
+    // // {
+    // //   note: {
+    // //     title: "Julien Baker",
+    // //     label: "May 25th at Boston Calling"
+    // //   },
+    // //   x: 210, y: 1250, dy: 0, dx: -150
+    // // },   
+    // {
+    //   note: {
+    //     title: "Japanese Breakfast",
+    //     label: "June 1st at the Sinclair"
+    //   },
+    //   x: 150, y: xScale(new Date('1-Jun-2018')), dy: 30, dx: -32,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
+    // },   
+    // {
+    //   note: {
+    //     title: "Bon Iver",
+    //     label: "August 5th at the LA Bowl"
+    //   },
+    //   x: 230, y: xScale(new Date('5-Aug-2018')), dy: 70, dx: -125,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
+    // },   
+    // {
+    //   note: {
+    //     title: "Mitski",
+    //     label: "October 20th at the House of Blues"
+    //   },
+    //   x: 210, y: 2150, dy: 0, dx: -150,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
+    // },   
+    // {
+    //   note: {
+    //     title: "Mom Jeans (again)",
+    //     label: "November 1st at the ONCE Ballroom"
+    //   },
+    //   x: 210, y: 2350, dy: 0, dx: -150,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
+    // }, 
+    // {
+    //   note: {
+    //     title: "Pinegrove",
+    //     label: "November 24th at the Sinclair"
+    //   },
+    //   x: 210, y: 2500, dy: 0, dx: -150,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
+    // },
+    // {
+    //   note: {
+    //     title: "Tiny Moving Parts (again)",
+    //     label: "November 25th at the House of Blues"
+    //   },
+    //   x: 210, y: 2750, dy: 0, dx: -150,
+    //   connector: {
+    //     curve: d3.curveLinear,
+    //     points: [[-50, 0]]
+    //   }
     }].map(function(d){ d.color = "#8a2d96"; return d});
 
     const makeAnnotations = d3.annotation()
@@ -611,13 +611,14 @@
   var deepestGenresByArtist;
   // var genreLegendG, artistLegendG;
 
-  const treeSvg = d3$1.select('.stacked-area-artist-vertical');
+  const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical');
   const areaGenreSvg = d3$1.select('.stacked-area-genre');
   const areaArtistSvg = d3$1.select('.stacked-area-artist');
   const colorScale = d3$1.scaleOrdinal();
 
-  const zoomG = treeSvg
-    .append('g');
+  const verticalAreaG = verticalAreaSvg.append('g')
+    // .attr('class', 'zoom')  
+    .attr('transform', `translate(${500}, 0), rotate(90)`);
 
   const areaGenreG = areaGenreSvg.append('g')
       .attr('transform', `translate(${175},${10})`);
@@ -627,14 +628,13 @@
 
   const areaArtistG = areaArtistSvg.append('g')
       .attr('transform', `translate(${175},${10})`);
-  const artistLegendG = treeSvg.append('g')
+  const artistLegendG = verticalAreaSvg.append('g')
     .attr('transform', `translate(${385},${270})`);
 
-  const treeG = zoomG.append('g')
-    .attr('class', 'zoom')  
-    .attr('transform', `translate(785, 0), rotate(90)`);
+  // const verticalAreaG = zoomG.append('g')
+    
 
-  // treeSvg.call(zoom().on('zoom', () => {
+  // verticalAreaSvg.call(zoom().on('zoom', () => {
   //   zoomG.attr('transform', event.transform);
   // }));
 
@@ -676,7 +676,7 @@
   };
 
   const render = () => {
-  	// treeG.call(treemap, {
+  	// verticalAreaG.call(treemap, {
    //    jsonData,
    //    deepestGenresByArtist,
    //    totalPlaysArtist,
@@ -685,14 +685,13 @@
    //    playScale
    //  });
 
-   treeG.call(stackedAreaVertical, {
+   verticalAreaG.call(stackedAreaVertical, {
       dataToStack: byWeekPlaysArtist,
       legend: topArtists,
       colorScale: artistColorScale,
       selectedLegendItem: selectedArtist,
-      width: 1960,
-      height: 500,
-      circleRadius: 3,
+      width: 500,
+      height: 2000,
     });
 
     genreLegendG.call(colorLegend, {

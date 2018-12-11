@@ -18,7 +18,7 @@ import {
 import { loadData } from './loadData';
 import { treemap } from './treemap';
 import { stackedAreaHorizontal } from './stackedAreaHorizontal';
-import { stackedAreaVertical } from './stackedAreaVertical'
+import { stackedAreaVertical } from './stackedAreaVertical';
 import { colorLegend } from './colorLegend';
 
 //Hack
@@ -38,15 +38,16 @@ var deepestGenresByArtist;
 var byWeekPlays;
 // var genreLegendG, artistLegendG;
 
-const treeSvg = select('.stacked-area-artist-vertical');
+const verticalAreaSvg = select('.stacked-area-artist-vertical');
 const areaGenreSvg = select('.stacked-area-genre');
 const areaArtistSvg = select('.stacked-area-artist');
 
 const colorValue = d => d.artist;
 const colorScale = scaleOrdinal();
 
-const zoomG = treeSvg
-  .append('g');
+const verticalAreaG = verticalAreaSvg.append('g')
+  // .attr('class', 'zoom')  
+  .attr('transform', `translate(${500}, 0), rotate(90)`);
 
 const areaGenreG = areaGenreSvg.append('g')
     .attr('transform', `translate(${175},${10})`);
@@ -56,14 +57,13 @@ const genreLegendG = areaGenreSvg.append('g')
 
 const areaArtistG = areaArtistSvg.append('g')
     .attr('transform', `translate(${175},${10})`);
-const artistLegendG = treeSvg.append('g')
+const artistLegendG = verticalAreaSvg.append('g')
   .attr('transform', `translate(${385},${270})`);
 
-const treeG = zoomG.append('g')
-  .attr('class', 'zoom')  
-  .attr('transform', `translate(785, 0), rotate(90)`);
+// const verticalAreaG = zoomG.append('g')
+  
 
-// treeSvg.call(zoom().on('zoom', () => {
+// verticalAreaSvg.call(zoom().on('zoom', () => {
 //   zoomG.attr('transform', event.transform);
 // }));
 
@@ -105,7 +105,7 @@ const onClickArtist = d => {
 };
 
 const render = () => {
-	// treeG.call(treemap, {
+	// verticalAreaG.call(treemap, {
  //    jsonData,
  //    deepestGenresByArtist,
  //    totalPlaysArtist,
@@ -114,14 +114,13 @@ const render = () => {
  //    playScale
  //  });
 
- treeG.call(stackedAreaVertical, {
+ verticalAreaG.call(stackedAreaVertical, {
     dataToStack: byWeekPlaysArtist,
     legend: topArtists,
     colorScale: artistColorScale,
     selectedLegendItem: selectedArtist,
-    width: 1960,
-    height: 500,
-    circleRadius: 3,
+    width: 500,
+    height: 2000,
   });
 
   genreLegendG.call(colorLegend, {
