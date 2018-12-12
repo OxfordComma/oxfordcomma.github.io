@@ -49,12 +49,14 @@ export const stackedAreaVertical = (selection, props) => {
   // X-axis and scale
   // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
   // This converts from the week scale to a day scale
+
+  console.log((extent(dataToStack, xValue)[1] - 1) * 7 + 1)
   const xScale = scaleTime()
     .domain([
       new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
       new Date(2018, 0, (extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
     .range([0, height])
-    // .nice()
+    .nice()
   
   const yScale = scaleLinear()
     .domain([0, 

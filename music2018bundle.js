@@ -42,11 +42,6 @@
           plays: 0,
         };  
       });
-
-      // totalPlaysGenre['test'] = { 
-      //     depth: 0,
-      //     plays: 0,
-      //   }
           
       csvData.forEach(d => {
         d.listen_date = new Date(d.listen_date);
@@ -81,8 +76,8 @@
         // else
         //   totalPlaysGenre[d.genre[0]].plays += 1;
 
-        // if (deepestGenresByArtist[d.artist] === undefined)
-        //   deepestGenresByArtist[d.artist] = d.genre[0];
+        if (deepestGenresByArtist[d.artist] === undefined)
+          deepestGenresByArtist[d.artist] = d.genre[0];
         
         if (weekDict[d.weekNum] === undefined)
           weekDict[d.weekNum] = {artists: {}, genres: {}};
@@ -244,12 +239,14 @@
     // X-axis and scale
     // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
     // This converts from the week scale to a day scale
+
+    console.log((d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1);
     const xScale = d3$1.scaleTime()
       .domain([
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-      .range([0, height]);
-      // .nice()
+      .range([0, height])
+      .nice();
     
     const yScale = d3$1.scaleLinear()
       .domain([0, 

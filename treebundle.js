@@ -42,11 +42,6 @@
           plays: 0,
         };  
       });
-
-      // totalPlaysGenre['test'] = { 
-      //     depth: 0,
-      //     plays: 0,
-      //   }
           
       csvData.forEach(d => {
         d.listen_date = new Date(d.listen_date);
@@ -81,8 +76,8 @@
         // else
         //   totalPlaysGenre[d.genre[0]].plays += 1;
 
-        // if (deepestGenresByArtist[d.artist] === undefined)
-        //   deepestGenresByArtist[d.artist] = d.genre[0];
+        if (deepestGenresByArtist[d.artist] === undefined)
+          deepestGenresByArtist[d.artist] = d.genre[0];
         
         if (weekDict[d.weekNum] === undefined)
           weekDict[d.weekNum] = {artists: {}, genres: {}};
@@ -164,13 +159,13 @@
       height,
       playScale
     } = props;
-    
+
     var maxGenreDepth = 0;
     
     const treeLayout = d3$1.cluster()
       .size([height, width])
       .separation((a, b) => { 
-        return (a.parent == b.parent ? 0.7 : 1); 
+        return (a.parent == b.parent ? 1 : 1); 
       });
 
     const root = d3$1.hierarchy(jsonData);  
@@ -181,12 +176,14 @@
         Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
         if (totalPlaysArtist[f] < 5)
           return;
+        // console.log(f)
 
         var newNode = d3$1.hierarchy({
           id: f, 
           artist: f, 
           plays: totalPlaysArtist[f]
         });
+
         newNode.parent = d;  
         if (d.children === undefined)
           d.children = [];
@@ -207,7 +204,7 @@
       .x(d => d.y)
       .y(d => d.x);
 
-    const treeSpread = 20;
+    const treeSpread = 150;
 
     links.forEach(d => {
       if (d.target.data.artist)
@@ -227,7 +224,7 @@
         .attr('dy', '0.32em')
         .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
     		//.attr('font-size', d => d.children ? '1em' : '0.2em')
-    		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'white')
+    		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
         .attr('font-size', d => d.data.artist ? Math.log(d.data.plays) * 2 : '1.1em')
         .text(d => d.data.id); 
   };
@@ -319,12 +316,14 @@
     // X-axis and scale
     // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
     // This converts from the week scale to a day scale
+
+    console.log((d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1);
     const xScale = d3$1.scaleTime()
       .domain([
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
         new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-      .range([0, height]);
-      // .nice()
+      .range([0, height])
+      .nice();
     
     const yScale = d3$1.scaleLinear()
       .domain([0, 

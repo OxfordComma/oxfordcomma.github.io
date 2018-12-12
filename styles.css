@@ -16,11 +16,10 @@ h1 {
 }
 
 /*Tree*/
-/*.tree path{
+.tree path{
   fill: none;
   stroke: #a8a1dd;
-}*/
-
+}
 
 /*Stacked area*/
 .legend {

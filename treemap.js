@@ -15,13 +15,13 @@ export const treemap = (selection, props) => {
     height,
     playScale
   } = props;
-  
+
   var maxGenreDepth = 0;
   
   const treeLayout = cluster()
     .size([height, width])
     .separation((a, b) => { 
-      return (a.parent == b.parent ? 0.7 : 1); 
+      return (a.parent == b.parent ? 1 : 1); 
     })
 
   const root = hierarchy(jsonData);  
@@ -32,12 +32,14 @@ export const treemap = (selection, props) => {
       Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
       if (totalPlaysArtist[f] < 5)
         return;
+      // console.log(f)
 
       var newNode = hierarchy({
         id: f, 
         artist: f, 
         plays: totalPlaysArtist[f]
       });
+
       newNode.parent = d;  
       if (d.children === undefined)
         d.children = [];
@@ -58,7 +60,7 @@ export const treemap = (selection, props) => {
     .x(d => d.y)
     .y(d => d.x);
 
-  const treeSpread = 20
+  const treeSpread = 150
 
   links.forEach(d => {
     if (d.target.data.artist)
@@ -78,7 +80,7 @@ export const treemap = (selection, props) => {
       .attr('dy', '0.32em')
       .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
   		//.attr('font-size', d => d.children ? '1em' : '0.2em')
-  		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'white')
+  		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
       .attr('font-size', d => d.data.artist ? Math.log(d.data.plays) * 2 : '1.1em')
       .text(d => d.data.id); 
 };

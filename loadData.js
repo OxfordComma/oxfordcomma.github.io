@@ -24,7 +24,7 @@ export const loadData = url => {
     const numGenres = 10;
 
     // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
-    const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout'];
+    // const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout'];
 
     // Remove these character from the genre names
     const punctuationToRemove = [' ', '-'];
@@ -46,11 +46,6 @@ export const loadData = url => {
         plays: 0,
       };  
     })
-
-    // totalPlaysGenre['test'] = { 
-    //     depth: 0,
-    //     plays: 0,
-    //   }
         
     csvData.forEach(d => {
       d.listen_date = new Date(d.listen_date);
@@ -85,8 +80,8 @@ export const loadData = url => {
       // else
       //   totalPlaysGenre[d.genre[0]].plays += 1;
 
-      // if (deepestGenresByArtist[d.artist] === undefined)
-      //   deepestGenresByArtist[d.artist] = d.genre[0];
+      if (deepestGenresByArtist[d.artist] === undefined)
+        deepestGenresByArtist[d.artist] = d.genre[0];
       
       if (weekDict[d.weekNum] === undefined)
         weekDict[d.weekNum] = {artists: {}, genres: {}};
