@@ -22,8 +22,11 @@
       var byWeekPlaysGenre = [];
       var byWeekPlaysArtist = [];
       var weekDict = {};
-      const numArtists = 35;
-      const numGenres = 10;
+      const numArtists = 100;
+      const numGenres = 50;
+
+      // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
+      const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout'];
 
       var genreHierarchy = d3$1.hierarchy(jsonData); 
       genreHierarchy.data = jsonData; 
@@ -53,8 +56,8 @@
         d.genre = d.genre
           .replace(/[[\]]/g, '')
           .split(',')
-          .map(g => g.replace(/ /g, ''));
-          // .filter(g => Object.keys(totalPlaysGenre).includes(g))
+          .map(g => g.toLowerCase().replace(/\s|-/g, ''))
+          .filter(g => !genresToRemove.includes(g));
           // .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
         
         if (d.genre.length == 0)
@@ -71,10 +74,13 @@
         else
           totalPlaysArtist[d.artist] += 1;
         
-        // if (totalPlaysGenre[d.genre[0]] === undefined)
-        //   totalPlaysGenre[d.genre[0]].plays = 1;
-        // else
-        //   totalPlaysGenre[d.genre[0]].plays += 1;
+        d.genre.forEach(g => {
+          // console.log(totalPlaysGenre[g])
+          if (totalPlaysGenre[g] === undefined)
+            totalPlaysGenre[g] = { depth: -1, plays: 1};
+          else
+            totalPlaysGenre[g].plays += 1;
+        });
 
         if (deepestGenresByArtist[d.artist] === undefined)
           deepestGenresByArtist[d.artist] = d.genre[0];
@@ -111,8 +117,8 @@
           artistObj[a] = weekDict[w].artists[a] ? weekDict[w].artists[a] : 0;
         });
         
-        artistObj['everything else'] = 0;
-        genreObj['everything else'] = 0;
+        // artistObj['everything else'] = 0;
+        // genreObj['everything else'] = 0;
         // Object.keys(weekDict[w].artists).forEach(a => {
         //   if (!topArtists.includes(a))
         //     artistObj['everything else'] += weekDict[w].artists[a];  
@@ -120,10 +126,10 @@
         byWeekPlaysArtist.push(artistObj);
 
         
-        Object.keys(weekDict[w].genres).forEach(g => {
-          if (!topGenres.includes(g))
-            genreObj['everything else'] += weekDict[w].genres[g];  
-        });
+        // Object.keys(weekDict[w].genres).forEach(g => {
+        //   if (!topGenres.includes(g))
+        //     genreObj['everything else'] += weekDict[w].genres[g];  
+        // });
         
         topGenres.forEach(g => {
           genreObj[g] = weekDict[w].genres[g] ? weekDict[w].genres[g] : 0;
@@ -132,7 +138,7 @@
       });
       // topArtists.push('everything else');
       // console.log(topGenres)
-      topGenres.push('everything else');
+      // topGenres.push('everything else');
 
 
       var toReturn = {}; 
@@ -140,7 +146,7 @@
       toReturn.jsonData = genreHierarchy.data;
       toReturn.byWeekPlaysGenre = byWeekPlaysGenre.reverse(); 
       toReturn.byWeekPlaysArtist = byWeekPlaysArtist;
-      // toReturn.totalPlaysGenre = totalPlaysGenre;
+      toReturn.totalPlaysGenre = totalPlaysGenre;
       toReturn.totalPlaysArtist = totalPlaysArtist;
       toReturn.deepestGenresByArtist = deepestGenresByArtist;
       toReturn.topGenres = topGenres;
@@ -233,26 +239,16 @@
     const gEnter = g.enter()
       .append('g')
         .attr('class', 'container');
-   
-    const xValue = d => d.week;
-    
-    // X-axis and scale
-    // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
-    // This converts from the week scale to a day scale
 
-    console.log((d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1);
     const xScale = d3$1.scaleTime()
       .domain([
-        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
-        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
+        new Date(2018, 0, 1), 
+        new Date(2019, 1, 1)])
       .range([0, height])
       .nice();
     
     const yScale = d3$1.scaleLinear()
-      .domain([0, 
-               // selectedLegendItem ? 
-               // max(dataToStack.map(d => d[selectedLegendItem])) : 
-               d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
+      .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
       .range([0, innerWidth])
       .nice(); 
     

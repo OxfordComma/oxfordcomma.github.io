@@ -49,20 +49,20 @@ export const stackedAreaVertical = (selection, props) => {
   // X-axis and scale
   // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
   // This converts from the week scale to a day scale
+  const getDateFromWeek = (weekNumber) => {
+    const numberOfDays = 7*(weekNumber-1)+1;
+    return new Date(2018, 0, numberOfDays);
+  }
 
-  console.log((extent(dataToStack, xValue)[1] - 1) * 7 + 1)
   const xScale = scaleTime()
     .domain([
-      new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
-      new Date(2018, 0, (extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
+      new Date(2018, 0, 1), 
+      new Date(2019, 1, 1)])
     .range([0, height])
     .nice()
   
   const yScale = scaleLinear()
-    .domain([0, 
-             // selectedLegendItem ? 
-             // max(dataToStack.map(d => d[selectedLegendItem])) : 
-             max(dataToStack.map(d => sum(Object.values(d))))])
+    .domain([0, max(dataToStack.map(d => sum(Object.values(d))))])
     .range([0, innerWidth])
     .nice(); 
   

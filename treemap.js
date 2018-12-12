@@ -11,9 +11,11 @@ export const treemap = (selection, props) => {
     jsonData,
     deepestGenresByArtist,
     totalPlaysArtist,
+    topArtists,
     width,
     height,
-    playScale
+    playScale,
+    selectedLegendList
   } = props;
 
   var maxGenreDepth = 0;
@@ -30,9 +32,8 @@ export const treemap = (selection, props) => {
     const genre = d.data.id;
     maxGenreDepth = d.depth > maxGenreDepth ? d.depth : maxGenreDepth;
       Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
-      if (totalPlaysArtist[f] < 5)
+      if (totalPlaysArtist[f] < 5 || !topArtists.includes(f))
         return;
-      // console.log(f)
 
       var newNode = hierarchy({
         id: f, 
@@ -60,7 +61,7 @@ export const treemap = (selection, props) => {
     .x(d => d.y)
     .y(d => d.x);
 
-  const treeSpread = 150
+  const treeSpread = 170
 
   links.forEach(d => {
     if (d.target.data.artist)
@@ -71,16 +72,20 @@ export const treemap = (selection, props) => {
 
   selection.selectAll('path').data(links)
     .enter().append('path')
-      .attr('d', linkPathGenerator);
+      .attr('d', linkPathGenerator)
+      // .attr('opacity', );
 
-  selection.selectAll('text').data(root.descendants()) 
-    .enter().append('text')
-      .attr('x', d => d.y)
-      .attr('y', d => d.x)
-      .attr('dy', '0.32em')
-      .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
-  		//.attr('font-size', d => d.children ? '1em' : '0.2em')
-  		.attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
-      .attr('font-size', d => d.data.artist ? Math.log(d.data.plays) * 2 : '1.1em')
-      .text(d => d.data.id); 
+  const treeText = selection.selectAll('text').data(root.descendants());
+  const treeTextEnter = treeText.enter().append('text')
+    .attr('x', d => d.y)
+    .attr('y', d => d.x)
+    .attr('dy', '0.32em')
+    .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
+    .attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
+    .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
+    .text(d => d.data.id); 
+
+  treeText.merge(treeTextEnter)
+    .transition(200)
+      .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2)
 };

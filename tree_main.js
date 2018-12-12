@@ -64,7 +64,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     .domain(topGenres)
     .range(schemeCategory10);
 
-  playScale = scaleSequential(interpolateRdBu)
+  playScale = scaleSequential(interpolatePlasma)
     .domain([0, max(Object.values(totalPlaysArtist)) + 100]);
   render();
 })
@@ -76,17 +76,10 @@ const onClickGenre = d => {
 };
 
 const onClickArtist = d => {
-  console.log(d)
   if (!selectedArtists.includes(d))
     selectedArtists.push(d);
   else
-  {
-    selectedArtists = selectedArtists.filter(val => 
-      {
-        // console.log(val)
-        return val != d;
-      })
-  }
+  selectedArtists = selectedArtists.filter(val => val != d);
   console.log(selectedArtists)
   render(); 
 };
@@ -96,9 +89,11 @@ const render = () => {
     jsonData,
     deepestGenresByArtist,
     totalPlaysArtist,
+    topArtists,
     width: 500,
-    height: 2000,
-    playScale
+    height: 2500,
+    playScale,
+    selectedLegendList: selectedArtists
   });
 
   verticalAreaG.call(stackedAreaVertical, {
@@ -107,7 +102,7 @@ const render = () => {
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
     width: 500,
-    height: 2000,
+    height: 2500
   });
 
   // genreLegendG.call(colorLegend, {
