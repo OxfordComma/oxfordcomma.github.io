@@ -26,7 +26,7 @@
       const numGenres = 50;
 
       // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
-      const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout'];
+      const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout', 'singersongwriter', 'acoustic'];
 
       var genreHierarchy = d3$1.hierarchy(jsonData); 
       genreHierarchy.data = jsonData; 
@@ -52,14 +52,13 @@
         if (d.genre === "")
           return;
 
-        // Sorted from deepest to shallowest genre
         d.genre = d.genre
           .replace(/[[\]]/g, '')
           .split(',')
           .map(g => g.toLowerCase().replace(/\s|-/g, ''))
           .filter(g => !genresToRemove.includes(g));
-          // .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
         
+        //If there's no genre we can't do much
         if (d.genre.length == 0)
           return;
 
@@ -74,13 +73,16 @@
         else
           totalPlaysArtist[d.artist] += 1;
         
+        //Add in the genres not in the tree but  give them negative depth so they are sorted last
         d.genre.forEach(g => {
-          // console.log(totalPlaysGenre[g])
           if (totalPlaysGenre[g] === undefined)
             totalPlaysGenre[g] = { depth: -1, plays: 1};
           else
             totalPlaysGenre[g].plays += 1;
         });
+
+        d.genre.sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
+
 
         if (deepestGenresByArtist[d.artist] === undefined)
           deepestGenresByArtist[d.artist] = d.genre[0];
@@ -233,6 +235,7 @@
       .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
       .attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
       .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
+      // .attr('font-size', '1.5em')
       .text(d => d.data.id); 
 
     treeText.merge(treeTextEnter)
@@ -405,7 +408,7 @@
         .duration(200)
         .attr('d', areaGenerator)
         .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
-        .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0 : 0);
+        .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
     // console.log(document.getElementById('legend'));
     const annotations = [];
@@ -604,7 +607,9 @@
 
     artistColorScale = d3$1.scaleOrdinal()
       .domain(topArtists);
+    
     const n = artistColorScale.domain().length;
+    
     artistColorScale
       .range(artistColorScale.domain().map((d, i) => d3$1.interpolatePlasma(i/(n+1))));
 

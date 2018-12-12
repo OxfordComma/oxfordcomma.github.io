@@ -24,7 +24,7 @@ export const loadData = url => {
     const numGenres = 50;
 
     // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
-    const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout'];
+    const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout', 'singersongwriter', 'acoustic'];
 
     // Remove these character from the genre names
     const punctuationToRemove = [' ', '-'];
@@ -53,14 +53,13 @@ export const loadData = url => {
       if (d.genre === "")
         return;
 
-      // Sorted from deepest to shallowest genre
       d.genre = d.genre
         .replace(/[[\]]/g, '')
         .split(',')
         .map(g => g.toLowerCase().replace(/\s|-/g, ''))
         .filter(g => !genresToRemove.includes(g))
-        // .sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
       
+      //If there's no genre we can't do much
       if (d.genre.length == 0)
         return;
 
@@ -75,13 +74,16 @@ export const loadData = url => {
       else
         totalPlaysArtist[d.artist] += 1;
       
+      //Add in the genres not in the tree but  give them negative depth so they are sorted last
       d.genre.forEach(g => {
-        // console.log(totalPlaysGenre[g])
         if (totalPlaysGenre[g] === undefined)
           totalPlaysGenre[g] = { depth: -1, plays: 1};
         else
           totalPlaysGenre[g].plays += 1;
       })
+
+      d.genre.sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
+
 
       if (deepestGenresByArtist[d.artist] === undefined)
         deepestGenresByArtist[d.artist] = d.genre[0];

@@ -83,6 +83,7 @@ export const treemap = (selection, props) => {
     .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
     .attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
     .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
+    // .attr('font-size', '1.5em')
     .text(d => d.data.id); 
 
   treeText.merge(treeTextEnter)

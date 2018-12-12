@@ -152,7 +152,7 @@ export const stackedAreaVertical = (selection, props) => {
       .duration(200)
       .attr('d', areaGenerator)
       .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
-      .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0 : 0);
+      .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
   // console.log(document.getElementById('legend'));
   const annotations = []

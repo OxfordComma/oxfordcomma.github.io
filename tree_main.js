@@ -56,7 +56,9 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
 
   artistColorScale = scaleOrdinal()
     .domain(topArtists);
+  
   const n = artistColorScale.domain().length;
+  
   artistColorScale
     .range(artistColorScale.domain().map((d, i) => interpolatePlasma(i/(n+1))));
 
