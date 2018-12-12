@@ -31,6 +31,7 @@ h1 {
 .tick text {
   font-size: 1.4em;
   fill: #635F5D;
+  font-family: 'Playfair Display';
 }
 
 .tick line {

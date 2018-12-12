@@ -219,128 +219,6 @@
 
   // Mouseover line adapted from here
 
-  const stackedAreaHorizontal = (selection, props) => {
-    const {
-      dataToStack,
-      legend,
-      colorScale,
-      selectedLegendItem,
-      width,
-      height,
-    } = props;
-    
-    const g = selection.selectAll('.container').data([null]);
-    const gEnter = g.enter()
-      .append('g')
-        .attr('class', 'container');
-   
-    const xValue = d => d.week;
-
-    const xAxisLabel = 'Week';
-    const yAxisLabel = 'Plays'; 
-    
-    // X-axis and scale
-    // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
-    const xScale = d3$1.scaleTime()
-      .domain([
-        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[0] - 1) * 7 + 1), 
-        new Date(2018, 0, (d3$1.extent(dataToStack, xValue)[1] - 1) * 7 + 1)])
-      .range([0, width])
-      .nice();
-    
-    const xAxis = d3$1.axisBottom(xScale)
-      // .ticks(9)
-      // .tickSize(-height)
-      // .tickPadding(15)
-      .tickFormat(d3.timeFormat('%B'));
-    
-    // From https://vizhub.com/curran/501f3fe24cfb4e6785ac75008b530a83
-    const xAxisG = g.select('.x-axis');
-    const xAxisGEnter = gEnter
-      .append('g').attr('class', 'x-axis');
-    
-    xAxisGEnter
-      .merge(xAxisG)
-        .call(xAxis)
-        .attr('transform', `translate(0,${height})`);
-        // .selectAll('.domain').remove()
-    
-    xAxisGEnter.append('text')
-        .attr('class', 'axis-label')
-        .attr('y', 50)
-        .attr('x', width / 2)
-        .attr('fill', 'black')
-        .text(xAxisLabel);
-    
-    // Y-axis and scale
-    const yScale = d3$1.scaleLinear()
-      .domain([0, 
-               // selectedLegendItem ? 
-               // max(data.map(d => d[selectedLegendItem])) : 
-               d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
-      .range([height, 0])
-      .nice();  
-    
-    const yAxis = d3$1.axisLeft(yScale);
-      // .tickSize(-width)
-      // .tickPadding(5)
-      // .tickFormat(yAxisTickFormat);
-    
-    const yAxisG = g.select('.y-axis');
-    const yAxisGEnter = gEnter
-      .append('g')
-        .attr('class', 'y-axis');
-    
-    yAxisGEnter
-      .merge(yAxisG)
-        .transition().duration(200)
-        .call(yAxis);
-    
-    yAxisGEnter.merge(yAxisG)
-        .selectAll('.domain').remove();
-    
-    yAxisGEnter.append('text')
-      .attr('class', 'axis-label')
-      .attr('y', -35)
-      .attr('x', -height / 2)
-      .attr('fill', 'black')
-      .attr('transform', `rotate(-90)`)
-      .attr('text-anchor', 'middle')
-      .text(yAxisLabel);
-    
-    var stack = d3.stack(dataToStack)
-      .keys(legend);
-      // .offset(d3.stackOffsetWiggle);
-
-
-    var series = stack(dataToStack);
-
-    // console.log(series)
-
-    const areaGenerator = d3$1.area()
-      .x(d => {
-        var toScale = new Date(2018, 0, (d.data.week - 1) * 7);
-        // console.log(toScale)
-        return xScale(toScale);
-      })
-      .y0(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? 0 : d[0]))
-      .y1(d => yScale(selectedLegendItem && (d.artist == selectedLegendItem) ? d[1] - d[0] : d[1]))
-      .curve(d3$1.curveBasis);
-    
-    const lines = selection.selectAll('.line-path').data(series);
-    const linesEnter = lines.enter().append('path')
-        .attr('class', 'line-path') 
-        .attr('fill', d => colorScale(d.key))
-        .attr('stroke', 'black');
-        
-    lines.merge(linesEnter)
-      .transition()
-        .duration(200)
-        .attr('d', areaGenerator)
-        .attr('opacity', d => (!selectedLegendItem || d.key === selectedLegendItem) ? 1 : 0)
-        .attr('stroke-width', d => (selectedLegendItem || d.key === selectedLegendItem) ? 0 : 0);
-  };
-
   // Mouseover line adapted from here
 
   const stackedAreaVertical = (selection, props) => {
@@ -622,26 +500,23 @@
   var topArtists, topGenres;
   var playScale;
   var selectedArtists = []; 
-  var selectedGenre;
   var deepestGenresByArtist;
   // var genreLegendG, artistLegendG;
 
   const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical');
-  const areaGenreSvg = d3$1.select('.stacked-area-genre');
-  const areaArtistSvg = d3$1.select('.stacked-area-artist');
   const colorScale = d3$1.scaleOrdinal();
 
   const verticalAreaG = verticalAreaSvg.append('g')
     .attr('transform', `translate(${250}, 0), rotate(90)`);
 
-  const areaGenreG = areaGenreSvg.append('g')
-      .attr('transform', `translate(${175},${5})`);
-  const genreLegendG = areaGenreSvg.append('g')
-    .attr('class', 'genre-legend')
-    .attr('transform', `translate(${10},${10})`);
+  // const areaGenreG = areaGenreSvg.append('g')
+  //     .attr('transform', `translate(${175},${5})`);
+  // const genreLegendG = areaGenreSvg.append('g')
+  //   .attr('class', 'genre-legend')
+  //   .attr('transform', `translate(${10},${10})`);
 
-  const areaArtistG = areaArtistSvg.append('g')
-      .attr('transform', `translate(${175},${10})`);
+  // const areaArtistG = areaArtistSvg.append('g')
+  //     .attr('transform', `translate(${175},${10})`);
   const artistLegendG = verticalAreaSvg.append('g')
     .attr('class', 'legend')
     .attr('transform', `translate(${5},${20})`);
@@ -667,18 +542,10 @@
       .domain(topGenres)
       .range(d3$1.schemeCategory10);
 
-    // console.log(max(Object.values(totalPlaysArtist)))
     playScale = d3$1.scaleSequential(d3$1.interpolateRdBu)
   		.domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
-    //console.log(colorScale.range())
     render();
   });
-
-  const onClickGenre = d => {
-    console.log('selected genre: ' + d);
-    selectedGenre = d;
-    render(); 
-  };
 
   const onClickArtist = d => {
     console.log(d);
@@ -688,7 +555,7 @@
     {
       selectedArtists = selectedArtists.filter(val => 
         {
-          console.log(val);
+          // console.log(val)
           return val != d;
         });
     }
@@ -697,16 +564,7 @@
   };
 
   const render = () => {
-  	// verticalAreaG.call(treemap, {
-   //    jsonData,
-   //    deepestGenresByArtist,
-   //    totalPlaysArtist,
-   //    innerWidth,
-   //    innerHeight,
-   //    playScale
-   //  });
-
-   verticalAreaG.call(stackedAreaVertical, {
+    verticalAreaG.call(stackedAreaVertical, {
       dataToStack: byWeekPlaysArtist,
       legend: topArtists,
       colorScale: artistColorScale,
@@ -715,15 +573,15 @@
       height: 2000,
     });
 
-    genreLegendG.call(colorLegend, {
-      colorScale: genreColorScale,
-      circleRadius: 5,
-      spacing: 15,
-      textOffset: 12,
-      backgroundRectWidth: 135,
-      onClick: onClickGenre,
-      selectedLegendItem: selectedGenre
-    });
+    // genreLegendG.call(colorLegend, {
+    //   colorScale: genreColorScale,
+    //   circleRadius: 5,
+    //   spacing: 15,
+    //   textOffset: 12,
+    //   backgroundRectWidth: 135,
+    //   onClick: onClickGenre,
+    //   selectedLegendItem: selectedGenre
+    // });
 
     artistLegendG.call(colorLegend, {
       colorScale: artistColorScale,
@@ -735,24 +593,24 @@
       selectedLegendList: selectedArtists
     });
 
-    areaGenreG.call(stackedAreaHorizontal, {
-      dataToStack: byWeekPlaysGenre,
-      legend: topGenres,
-      colorScale: genreColorScale,
-      selectedLegendItem: selectedGenre,
-      width: 960,
-      height: 500,
-    });
+    // areaGenreG.call(stackedAreaHorizontal, {
+    //   dataToStack: byWeekPlaysGenre,
+    //   legend: topGenres,
+    //   colorScale: genreColorScale,
+    //   selectedLegendItem: selectedGenre,
+    //   width: 960,
+    //   height: 500,
+    // });
 
-    areaArtistG.call(stackedAreaHorizontal, {
-      dataToStack: byWeekPlaysArtist,
-      legend: topArtists,
-      colorScale: artistColorScale,
-      selectedLegendItem: selectedArtists,
-      width: 960,
-      height: 500,
-    });
+    // areaArtistG.call(stackedAreaHorizontal, {
+    //   dataToStack: byWeekPlaysArtist,
+    //   legend: topArtists,
+    //   colorScale: artistColorScale,
+    //   selectedLegendItem: selectedArtists,
+    //   width: 960,
+    //   height: 500,
+    // });
   };
 
 }(d3));
-//# sourceMappingURL=bundle.js.map
+//# sourceMappingURL=music2018bundle.js.map

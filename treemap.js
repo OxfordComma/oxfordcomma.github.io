@@ -11,18 +11,15 @@ export const treemap = (selection, props) => {
     jsonData,
     deepestGenresByArtist,
     totalPlaysArtist,
-    innerWidth,
-    innerHeight,
+    width,
+    height,
     playScale
   } = props;
-
-  const treeWidth = 500;
-  const treeHeight = 2000;
-
+  
   var maxGenreDepth = 0;
   
   const treeLayout = cluster()
-    .size([treeHeight, treeWidth])
+    .size([height, width])
     .separation((a, b) => { 
       return (a.parent == b.parent ? 0.7 : 1); 
     })

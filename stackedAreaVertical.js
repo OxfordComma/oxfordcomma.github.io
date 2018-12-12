@@ -33,7 +33,7 @@ export const stackedAreaVertical = (selection, props) => {
     height,
   } = props;
 
-  const margin = {left: 175, right: 25}
+  const margin = {left: 175, right: 100}
   const innerWidth = width - margin.left - margin.right
 
   const g = selection.selectAll('.container').data([null]);
