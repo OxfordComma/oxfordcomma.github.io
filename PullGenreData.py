@@ -40,7 +40,7 @@ for index, t in enumerate(total_tracks):
         artist_genres[artist_name] = genres
     else:
         genres = artist_genres[artist_name]
-c
+
     # artists[artist] = genre
     to_csv.loc[index] = {
         'artist': artist_name,

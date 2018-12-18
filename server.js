@@ -10,6 +10,10 @@ app.get('/music2018', function(req, res) {
 	res.sendFile(path.join(__dirname + '/music2018.html'))
 })
 
+app.get('/music2017', function(req, res) {
+	res.sendFile(path.join(__dirname + '/music2017.html'))
+})
+
 app.get('/tree', function(req, res) {
 	res.sendFile(path.join(__dirname + '/tree.html'))
 })
