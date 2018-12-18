@@ -230,11 +230,8 @@
     }); 
 
     selection.selectAll('path').data(links)
-      .enter().append('title')
-        .text('nothing')
-        .append('path')
+      .enter().append('path')
         .attr('d', linkPathGenerator);
-      
 
     console.log(root.descendants());
     const treeText = selection.selectAll('text').data(root.descendants());
@@ -243,7 +240,7 @@
       .attr('x', d => d.y)
       .attr('y', d => d.x)
       .attr('dy', '0.32em')
-      .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
+      .attr('text-anchor', d => d.data.artist ? 'start' : 'start')
       .attr('fill', d => d.data.artist ? colorScale(d.data.id) : 'black')
       // .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
       .text(d => d.data.id); 
@@ -631,7 +628,7 @@
     const n = artistColorScale.domain().length;
     
     artistColorScale
-      .range(artistColorScale.domain().map((d, i) => d3$1.interpolatePlasma(i/(n+1))));
+      .range(artistColorScale.domain().map((d, i) => d3$1.interpolateRainbow(i/(n+1))));
 
     genreColorScale = d3$1.scaleOrdinal()
       .domain(topGenres)

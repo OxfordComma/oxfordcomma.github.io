@@ -118,7 +118,7 @@ export const treemap = (selection, props) => {
     .attr('x', d => d.y)
     .attr('y', d => d.x)
     .attr('dy', '0.32em')
-    .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
+    .attr('text-anchor', d => d.data.artist ? 'start' : 'start')
     .attr('fill', d => d.data.artist ? colorScale(d.data.id) : 'black')
     // .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
     .text(d => d.data.id); 

@@ -21,6 +21,15 @@ h1 {
   stroke: #a8a1dd;
 }
 
+.tree text {
+  font-size: 1.4em;
+  text-shadow:
+   -1px -1px 3px white,
+   -1px  1px 3px white,
+    1px -1px 3px white,
+    1px  1px 3px white;
+}
+
 .line-path:hover {
   fill: lightblue;
 }

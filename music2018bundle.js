@@ -525,7 +525,7 @@
       .domain(topArtists.slice(0, numStackedAreaArtists));
     const n = artistColorScale.domain().length;
     artistColorScale
-      .range(artistColorScale.domain().map((d, i) => d3$1.interpolatePlasma(i/(n+1))));
+      .range(artistColorScale.domain().map((d, i) => d3$1.interpolateRainbow(i/(n+1))));
 
    	genreColorScale = d3$1.scaleOrdinal()
       .domain(topGenres)

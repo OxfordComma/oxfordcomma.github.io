@@ -11,7 +11,8 @@ import {
   max,
   interpolateRdBu,
   interpolatePlasma,
-  schemeCategory10
+  schemeCategory10,
+  interpolateRainbow
 } from 'd3';
 import { loadData } from './loadData';
 import { treemap } from './treemap';
@@ -65,7 +66,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   const n = artistColorScale.domain().length;
   
   artistColorScale
-    .range(artistColorScale.domain().map((d, i) => interpolatePlasma(i/(n+1))));
+    .range(artistColorScale.domain().map((d, i) => interpolateRainbow(i/(n+1))));
 
   genreColorScale = scaleOrdinal()
     .domain(topGenres)
