@@ -19,6 +19,21 @@ export default [{
     builtins()
   ]
 }, {
+  input: 'music2017_main.js',
+  external: ['d3'],
+  output: {
+    file: 'music2017bundle.js',
+    format: 'iife',
+    sourcemap: true,
+    globals: { d3: 'd3'}
+  },
+  plugins: [
+    resolve(),
+    commonjs(),
+    globals(),
+    builtins()
+  ]
+}, {
   input: 'tree_main.js',
   external: ['d3'],
   output: {

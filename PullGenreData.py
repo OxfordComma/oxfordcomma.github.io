@@ -13,8 +13,8 @@ password_hash = 'f22ec97b78a7ebf61bf26c6a0cedf014'
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=username, password_hash=password_hash)
 user = network.get_user(username)
-start_date = datetime.datetime(2018, 1, 1, 0, 0, 0).strftime('%s')
-end_date = datetime.datetime(2019, 1, 1, 0, 0, 0).strftime('%s')
+start_date = datetime.datetime(2017, 1, 1, 0, 0, 0).strftime('%s')
+end_date = datetime.datetime(2018, 1, 1, 0, 0, 0).strftime('%s')
 
 total_tracks = []
 recent_tracks = user.get_recent_tracks(limit=1000, time_from=start_date)
@@ -40,7 +40,7 @@ for index, t in enumerate(total_tracks):
         artist_genres[artist_name] = genres
     else:
         genres = artist_genres[artist_name]
-
+c
     # artists[artist] = genre
     to_csv.loc[index] = {
         'artist': artist_name,
