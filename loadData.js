@@ -111,8 +111,8 @@ export const loadData = url => {
       const i = +w - 1;
       var obj = {week: i + 1};
       
-      topArtists = sortedArtistList.slice(0, numArtists);
-      topGenres = sortedGenreList.slice(0, numGenres);
+      topArtists = sortedArtistList//.slice(0, numArtists);
+      topGenres = sortedGenreList//.slice(0, numGenres);
       
       var genreObj = {week: i + 1};
       var artistObj = {week: i + 1};

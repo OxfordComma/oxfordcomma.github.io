@@ -6,7 +6,8 @@ export const colorLegend = (selection, props) => {
     textOffset,
     backgroundRectWidth,
     onClick,
-    selectedLegendList
+    selectedLegendList,
+    numArtists
   } = props;      
 
   const backgroundRect = selection.selectAll('rect')
@@ -25,7 +26,7 @@ export const colorLegend = (selection, props) => {
       .attr('opacity', 0);
 
   const groups = selection.selectAll('.legend')
-    .data(colorScale.domain());
+    .data(colorScale.domain().slice(0, numArtists));
   
   const groupsEnter = groups
     .enter().append('g')

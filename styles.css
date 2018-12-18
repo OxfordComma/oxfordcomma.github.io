@@ -16,17 +16,25 @@ h1 {
 }
 
 /*Tree*/
-.tree path{
+.tree path {
   fill: none;
   stroke: #a8a1dd;
+}
+
+.line-path:hover {
+  fill: lightblue;
 }
 
 /*Stacked area*/
 .legend {
   font-size: 0.8em;
   cursor: pointer;
+  position: fixed;
 }
 
+.artist {
+  cursor: pointer;
+}
 .tick text {
   font-size: 1.4em;
   fill: #635F5D;

@@ -22,8 +22,6 @@
       var byWeekPlaysGenre = [];
       var byWeekPlaysArtist = [];
       var weekDict = {};
-      const numArtists = 100;
-      const numGenres = 50;
 
       // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
       const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout', 'singersongwriter', 'acoustic'];
@@ -109,8 +107,8 @@
       Object.keys(weekDict).forEach(w => {
         const i = +w - 1;
         
-        topArtists = sortedArtistList.slice(0, numArtists);
-        topGenres = sortedGenreList.slice(0, numGenres);
+        topArtists = sortedArtistList;//.slice(0, numArtists);
+        topGenres = sortedGenreList;//.slice(0, numGenres);
         
         var genreObj = {week: i + 1};
         var artistObj = {week: i + 1};
@@ -166,10 +164,14 @@
       topArtists,
       width,
       height,
-      playScale,
-      selectedLegendList
+      colorScale,
+      selectedLegendList,
+      numArtists,
+      onClick
     } = props;
 
+    const topArtistsTrimmed = topArtists.slice(0, numArtists);
+    const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
     var maxGenreDepth = 0;
     
     const treeLayout = d3$1.cluster()
@@ -178,67 +180,77 @@
         return (a.parent == b.parent ? 1 : 1); 
       });
 
-    const root = d3$1.hierarchy(jsonData);  
-    
+    // addArtistsToTree(topArtistsTrimmed, jsonData);
+    // console.log(jsonData)
+    // removeEmptyLeaves(jsonData)
+    var root = d3$1.hierarchy(jsonData); 
+
     root.descendants().forEach(d => {
-      const genre = d.data.id;
+    //   const genre = d.data.id;
       maxGenreDepth = d.depth > maxGenreDepth ? d.depth : maxGenreDepth;
-        Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
-        if (totalPlaysArtist[f] < 5 || !topArtists.includes(f))
-          return;
+    //   Object.keys(deepestGenresByArtist).filter(a => deepestGenresByArtist[a] === genre).forEach(f => {
+    //     if (!topArtistsTrimmed.includes(f))
+    //       return;
 
-        var newNode = d3$1.hierarchy({
-          id: f, 
-          artist: f, 
-          plays: totalPlaysArtist[f]
-        });
+    //     var newNode = hierarchy({
+    //       id: f, 
+    //       artist: f, 
+    //       plays: totalPlaysArtist[f]
+    //     });
 
-        newNode.parent = d;  
-        if (d.children === undefined)
-          d.children = [];
+    //     newNode.parent = d;  
+    //     if (d.children === undefined)
+    //       d.children = [];
 
-        d.children.push(newNode);
-      });
-    });
-    
+    //     d.children.push(newNode);
+    //   })
+    }); 
+
     root.sort((a,b) => {
       var aLen = a.children === undefined ? -1 : a.children.length;
       var bLen = b.children === undefined ? -1 : b.children.length;
       return(bLen - aLen); 
     });
     
+    console.log(maxGenreDepth);
     const tree = treeLayout(root);
-    const links = tree.links();    
+    var links = tree.links();   
+   
     const linkPathGenerator = d3$1.linkHorizontal()
       .x(d => d.y)
       .y(d => d.x);
 
-    const treeSpread = 170;
+    const treeSpread = 150;
 
     links.forEach(d => {
       if (d.target.data.artist)
         d.target.y = (maxGenreDepth + 1) * treeSpread;
       else
-    		d.target.y = d.target.depth * treeSpread;
+    		d.target.y = (d.target.depth + 1) * treeSpread;
     }); 
 
     selection.selectAll('path').data(links)
-      .enter().append('path')
+      .enter().append('title')
+        .text('nothing')
+        .append('path')
         .attr('d', linkPathGenerator);
-        // .attr('opacity', );
+      
 
+    console.log(root.descendants());
     const treeText = selection.selectAll('text').data(root.descendants());
     const treeTextEnter = treeText.enter().append('text')
+      .attr('class', d => d.data.artist ? 'artist' : 'genre')
       .attr('x', d => d.y)
       .attr('y', d => d.x)
       .attr('dy', '0.32em')
       .attr('text-anchor', d => d.data.artist ? 'start' : 'end')
-      .attr('fill', d => d.data.artist ? playScale(d.data.plays) : 'black')
-      .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
-      // .attr('font-size', '1.5em')
+      .attr('fill', d => d.data.artist ? colorScale(d.data.id) : 'black')
+      // .attr('font-size', d => d.data.artist ? 2.1*Math.log(d.data.plays) * 2 : '1.1em')
       .text(d => d.data.id); 
 
     treeText.merge(treeTextEnter)
+      .on('click', d => d.data.artist ? onClick(d.data.id) : true)
+
       .transition(200)
         .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2);
   };
@@ -251,7 +263,8 @@
       textOffset,
       backgroundRectWidth,
       onClick,
-      selectedLegendList
+      selectedLegendList,
+      numArtists
     } = props;      
 
     const backgroundRect = selection.selectAll('rect')
@@ -270,7 +283,7 @@
         .attr('opacity', 0);
 
     const groups = selection.selectAll('.legend')
-      .data(colorScale.domain());
+      .data(colorScale.domain().slice(0, numArtists));
     
     const groupsEnter = groups
       .enter().append('g')
@@ -310,14 +323,17 @@
   const stackedAreaVertical = (selection, props) => {
     const {
       dataToStack,
-      legend,
+      topArtists,
       colorScale,
       selectedLegendList,
       width,
       height,
+      numArtists,
+      onClick
     } = props;
 
-    const margin = {left: 175, right: 100};
+    const topArtistsTrimmed = topArtists.slice(0, numArtists);
+    const margin = {left: 0, right: 0};
     const innerWidth = width - margin.left - margin.right;
 
     const g = selection.selectAll('.container').data([null]);
@@ -328,9 +344,9 @@
     const xScale = d3$1.scaleTime()
       .domain([
         new Date(2018, 0, 1), 
-        new Date(2019, 1, 1)])
-      .range([0, height])
-      .nice();
+        new Date(2018, 11, 31)])
+      .range([0, height]);
+      // .nice()
     
     const yScale = d3$1.scaleLinear()
       .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
@@ -386,7 +402,7 @@
     //   .text(yAxisLabel);
     
     var stack = d3.stack(dataToStack)
-      .keys(legend)
+      .keys(topArtistsTrimmed)
       .offset(d3.stackOffsetWiggle);
 
     var series = stack(dataToStack);
@@ -404,6 +420,7 @@
         .attr('stroke', 'black');
         
     lines.merge(linesEnter)
+      .on('click', d => onClick(d.key))
       .transition()
         .duration(200)
         .attr('d', areaGenerator)
@@ -579,7 +596,8 @@
   var playScale;
   var selectedArtists = []; 
   var deepestGenresByArtist;
-  // var genreLegendG, artistLegendG;
+
+  const numStackedAreaArtists = 20;
 
   const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical');
   const treeSvg = d3$1.select('.tree');
@@ -605,9 +623,11 @@
     deepestGenresByArtist = data.deepestGenresByArtist;
     totalPlaysArtist = data.totalPlaysArtist;
 
+
     artistColorScale = d3$1.scaleOrdinal()
-      .domain(topArtists);
-    
+      .domain(topArtists.slice(0, numStackedAreaArtists));
+
+
     const n = artistColorScale.domain().length;
     
     artistColorScale
@@ -619,6 +639,14 @@
 
     playScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
       .domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
+
+    const topArtistsTrimmed = topArtists.slice(0, 20);
+    const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
+    addArtistsToTree(topArtistsTrimmed, jsonData);
+    // console.log(jsonData)
+    removeEmptyLeaves(jsonData);
+
+
     render();
   });
 
@@ -631,6 +659,34 @@
     render(); 
   };
 
+  const addArtistsToTree = function(artists, t) {
+      artists.forEach(a => (deepestGenresByArtist[a] == t.id ? t.children.push({id: a, artist: true, children: []}) : 1));
+      if (t.children)
+        t.children.forEach(c => addArtistsToTree(artists, c));
+    };
+
+  const removeEmptyLeaves = function(t) {
+    if (t.children.length > 0)
+    {
+      var toRemove = [];
+      t.children.forEach(c => {
+        removeEmptyLeaves(c);
+
+        if (!c.artist && c.children.length == 0)
+        {
+          toRemove.push(c.id);
+        }
+      });
+      if (toRemove)
+      {
+        // console.log('to remove: ' + toRemove)
+        // console.log(t.children)
+        t.children = t.children.filter(c => !toRemove.includes(c.id));
+        // console.log(t.children)
+      }
+    }
+  };
+
   const render = () => {
     treeG.call(treemap, {
       jsonData,
@@ -638,29 +694,23 @@
       totalPlaysArtist,
       topArtists,
       width: 500,
-      height: 2500,
-      playScale,
-      selectedLegendList: selectedArtists
+      height: 800,
+      colorScale: artistColorScale,
+      selectedLegendList: selectedArtists,
+      numArtists: 20,
+      onClick: onClickArtist
     });
 
     verticalAreaG.call(stackedAreaVertical, {
       dataToStack: byWeekPlaysArtist,
-      legend: topArtists,
+      topArtists: topArtists,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
       width: 500,
-      height: 2500
+      height: 850,
+      numArtists: numStackedAreaArtists,
+      onClick: onClickArtist
     });
-
-    // genreLegendG.call(colorLegend, {
-    //   colorScale: genreColorScale,
-    //   circleRadius: 5,
-    //   spacing: 15,
-    //   textOffset: 12,
-    //   backgroundRectWidth: 135,
-    //   onClick: onClickGenre,
-    //   selectedLegendItem: selectedGenre
-    // });
 
     artistLegendG.call(colorLegend, {
       colorScale: artistColorScale,
@@ -669,26 +719,9 @@
       textOffset: 12,
       backgroundRectWidth: 135,
       onClick: onClickArtist,
-      selectedLegendList: selectedArtists
+      selectedLegendList: selectedArtists,
+      numArtists: numStackedAreaArtists
     });
-
-    // areaGenreG.call(stackedAreaHorizontal, {
-    //   dataToStack: byWeekPlaysGenre,
-    //   legend: topGenres,
-    //   colorScale: genreColorScale,
-    //   selectedLegendItem: selectedGenre,
-    //   width: 960,
-    //   height: 500,
-    // });
-
-    // areaArtistG.call(stackedAreaHorizontal, {
-    //   dataToStack: byWeekPlaysArtist,
-    //   legend: topArtists,
-    //   colorScale: artistColorScale,
-    //   selectedLegendItem: selectedArtists,
-    //   width: 960,
-    //   height: 500,
-    // });
   };
 
 }(d3));

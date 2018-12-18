@@ -26,10 +26,13 @@ var selectedArtists = [];
 var selectedGenre;
 var deepestGenresByArtist;
 var byWeekPlays;
-// var genreLegendG, artistLegendG;
+
+const numStackedAreaArtists = 20;
 
 const verticalAreaSvg = select('.stacked-area-artist-vertical');
 const treeSvg = select('.tree')
+  // .attr('width', 1000)
+  // .attr('height', 2000)
 
 const colorValue = d => d.artist;
 const colorScale = scaleOrdinal();
@@ -54,9 +57,11 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   deepestGenresByArtist = data.deepestGenresByArtist;
   totalPlaysArtist = data.totalPlaysArtist;
 
+
   artistColorScale = scaleOrdinal()
-    .domain(topArtists);
-  
+    .domain(topArtists.slice(0, numStackedAreaArtists));
+
+
   const n = artistColorScale.domain().length;
   
   artistColorScale
@@ -68,6 +73,14 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
 
   playScale = scaleSequential(interpolatePlasma)
     .domain([0, max(Object.values(totalPlaysArtist)) + 100]);
+
+  const topArtistsTrimmed = topArtists.slice(0, 20);
+  const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
+  addArtistsToTree(topArtistsTrimmed, jsonData);
+  // console.log(jsonData)
+  removeEmptyLeaves(jsonData)
+
+
   render();
 })
 
@@ -86,6 +99,34 @@ const onClickArtist = d => {
   render(); 
 };
 
+const addArtistsToTree = function(artists, t) {
+    artists.forEach(a => (deepestGenresByArtist[a] == t.id ? t.children.push({id: a, artist: true, children: []}) : 1))
+    if (t.children)
+      t.children.forEach(c => addArtistsToTree(artists, c))
+  }
+
+const removeEmptyLeaves = function(t) {
+  if (t.children.length > 0)
+  {
+    var toRemove = []
+    t.children.forEach(c => {
+      removeEmptyLeaves(c)
+
+      if (!c.artist && c.children.length == 0)
+      {
+        toRemove.push(c.id)
+      }
+    })
+    if (toRemove)
+    {
+      // console.log('to remove: ' + toRemove)
+      // console.log(t.children)
+      t.children = t.children.filter(c => !toRemove.includes(c.id))
+      // console.log(t.children)
+    }
+  }
+}
+
 const render = () => {
   treeG.call(treemap, {
     jsonData,
@@ -93,29 +134,23 @@ const render = () => {
     totalPlaysArtist,
     topArtists,
     width: 500,
-    height: 2500,
-    playScale,
-    selectedLegendList: selectedArtists
+    height: 800,
+    colorScale: artistColorScale,
+    selectedLegendList: selectedArtists,
+    numArtists: 20,
+    onClick: onClickArtist
   });
 
   verticalAreaG.call(stackedAreaVertical, {
     dataToStack: byWeekPlaysArtist,
-    legend: topArtists,
+    topArtists: topArtists,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
     width: 500,
-    height: 2500
+    height: 850,
+    numArtists: numStackedAreaArtists,
+    onClick: onClickArtist
   });
-
-  // genreLegendG.call(colorLegend, {
-  //   colorScale: genreColorScale,
-  //   circleRadius: 5,
-  //   spacing: 15,
-  //   textOffset: 12,
-  //   backgroundRectWidth: 135,
-  //   onClick: onClickGenre,
-  //   selectedLegendItem: selectedGenre
-  // });
 
   artistLegendG.call(colorLegend, {
     colorScale: artistColorScale,
@@ -124,24 +159,7 @@ const render = () => {
     textOffset: 12,
     backgroundRectWidth: 135,
     onClick: onClickArtist,
-    selectedLegendList: selectedArtists
+    selectedLegendList: selectedArtists,
+    numArtists: numStackedAreaArtists
   });
-
-  // areaGenreG.call(stackedAreaHorizontal, {
-  //   dataToStack: byWeekPlaysGenre,
-  //   legend: topGenres,
-  //   colorScale: genreColorScale,
-  //   selectedLegendItem: selectedGenre,
-  //   width: 960,
-  //   height: 500,
-  // });
-
-  // areaArtistG.call(stackedAreaHorizontal, {
-  //   dataToStack: byWeekPlaysArtist,
-  //   legend: topArtists,
-  //   colorScale: artistColorScale,
-  //   selectedLegendItem: selectedArtists,
-  //   width: 960,
-  //   height: 500,
-  // });
 }

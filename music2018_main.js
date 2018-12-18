@@ -25,6 +25,7 @@ var playColorScale;
 var selectedArtists = []; 
 var deepestGenresByArtist;
 var byWeekPlays;
+var numStackedAreaArtists = 30;
 
 const colorValue = d => d.artist;
 const colorScale = scaleOrdinal();
@@ -49,7 +50,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   totalPlaysArtist = data.totalPlaysArtist;
 
   artistColorScale = scaleOrdinal()
-    .domain(topArtists);
+    .domain(topArtists.slice(0, numStackedAreaArtists));
   const n = artistColorScale.domain().length;
   artistColorScale
     .range(artistColorScale.domain().map((d, i) => interpolatePlasma(i/(n+1))));
@@ -75,11 +76,13 @@ const onClickArtist = d => {
 const render = () => {
   verticalAreaG.call(stackedAreaVertical, {
     dataToStack: byWeekPlaysArtist,
-    legend: topArtists,
+    topArtists: topArtists,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
     width: 500,
-    height: 2000,
+    height: 850,
+    numArtists: numStackedAreaArtists,
+    onClick: onClickArtist
   });
 
   artistLegendG.call(colorLegend, {

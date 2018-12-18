@@ -22,8 +22,6 @@
       var byWeekPlaysGenre = [];
       var byWeekPlaysArtist = [];
       var weekDict = {};
-      const numArtists = 100;
-      const numGenres = 50;
 
       // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
       const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout', 'singersongwriter', 'acoustic'];
@@ -109,8 +107,8 @@
       Object.keys(weekDict).forEach(w => {
         const i = +w - 1;
         
-        topArtists = sortedArtistList.slice(0, numArtists);
-        topGenres = sortedGenreList.slice(0, numGenres);
+        topArtists = sortedArtistList;//.slice(0, numArtists);
+        topGenres = sortedGenreList;//.slice(0, numGenres);
         
         var genreObj = {week: i + 1};
         var artistObj = {week: i + 1};
@@ -166,7 +164,8 @@
       textOffset,
       backgroundRectWidth,
       onClick,
-      selectedLegendList
+      selectedLegendList,
+      numArtists
     } = props;      
 
     const backgroundRect = selection.selectAll('rect')
@@ -185,7 +184,7 @@
         .attr('opacity', 0);
 
     const groups = selection.selectAll('.legend')
-      .data(colorScale.domain());
+      .data(colorScale.domain().slice(0, numArtists));
     
     const groupsEnter = groups
       .enter().append('g')
@@ -227,14 +226,17 @@
   const stackedAreaVertical = (selection, props) => {
     const {
       dataToStack,
-      legend,
+      topArtists,
       colorScale,
       selectedLegendList,
       width,
       height,
+      numArtists,
+      onClick
     } = props;
 
-    const margin = {left: 175, right: 100};
+    const topArtistsTrimmed = topArtists.slice(0, numArtists);
+    const margin = {left: 0, right: 0};
     const innerWidth = width - margin.left - margin.right;
 
     const g = selection.selectAll('.container').data([null]);
@@ -245,9 +247,9 @@
     const xScale = d3$1.scaleTime()
       .domain([
         new Date(2018, 0, 1), 
-        new Date(2019, 1, 1)])
-      .range([0, height])
-      .nice();
+        new Date(2018, 11, 31)])
+      .range([0, height]);
+      // .nice()
     
     const yScale = d3$1.scaleLinear()
       .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
@@ -303,7 +305,7 @@
     //   .text(yAxisLabel);
     
     var stack = d3.stack(dataToStack)
-      .keys(legend)
+      .keys(topArtistsTrimmed)
       .offset(d3.stackOffsetWiggle);
 
     var series = stack(dataToStack);
@@ -321,6 +323,7 @@
         .attr('stroke', 'black');
         
     lines.merge(linesEnter)
+      .on('click', d => onClick(d.key))
       .transition()
         .duration(200)
         .attr('d', areaGenerator)
@@ -496,6 +499,7 @@
   var playColorScale;
   var selectedArtists = []; 
   var deepestGenresByArtist;
+  var numStackedAreaArtists = 30;
   const colorScale = d3$1.scaleOrdinal();
 
   const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical');
@@ -518,7 +522,7 @@
     totalPlaysArtist = data.totalPlaysArtist;
 
     artistColorScale = d3$1.scaleOrdinal()
-      .domain(topArtists);
+      .domain(topArtists.slice(0, numStackedAreaArtists));
     const n = artistColorScale.domain().length;
     artistColorScale
       .range(artistColorScale.domain().map((d, i) => d3$1.interpolatePlasma(i/(n+1))));
@@ -544,11 +548,13 @@
   const render = () => {
     verticalAreaG.call(stackedAreaVertical, {
       dataToStack: byWeekPlaysArtist,
-      legend: topArtists,
+      topArtists: topArtists,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
       width: 500,
-      height: 2000,
+      height: 850,
+      numArtists: numStackedAreaArtists,
+      onClick: onClickArtist
     });
 
     artistLegendG.call(colorLegend, {

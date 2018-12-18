@@ -26,14 +26,17 @@ import { colorLegend } from './colorLegend';
 export const stackedAreaVertical = (selection, props) => {
   const {
     dataToStack,
-    legend,
+    topArtists,
     colorScale,
     selectedLegendList,
     width,
     height,
+    numArtists,
+    onClick
   } = props;
 
-  const margin = {left: 175, right: 100}
+  const topArtistsTrimmed = topArtists.slice(0, numArtists);
+  const margin = {left: 0, right: 0}
   const innerWidth = width - margin.left - margin.right
 
   const g = selection.selectAll('.container').data([null]);
@@ -57,9 +60,9 @@ export const stackedAreaVertical = (selection, props) => {
   const xScale = scaleTime()
     .domain([
       new Date(2018, 0, 1), 
-      new Date(2019, 1, 1)])
+      new Date(2018, 11, 31)])
     .range([0, height])
-    .nice()
+    // .nice()
   
   const yScale = scaleLinear()
     .domain([0, max(dataToStack.map(d => sum(Object.values(d))))])
@@ -127,7 +130,7 @@ export const stackedAreaVertical = (selection, props) => {
   //   .text(yAxisLabel);
   
   var stack = d3.stack(dataToStack)
-    .keys(legend)
+    .keys(topArtistsTrimmed)
     .offset(d3.stackOffsetWiggle);
 
   var series = stack(dataToStack);
@@ -148,6 +151,7 @@ export const stackedAreaVertical = (selection, props) => {
       .attr('stroke', 'black')
       
   lines.merge(linesEnter)
+    .on('click', d => onClick(d.key))
     .transition()
       .duration(200)
       .attr('d', areaGenerator)
