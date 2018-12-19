@@ -54,7 +54,7 @@ for index, t in enumerate(total_tracks):
 # for index, row in enumerate(to_csv):
 
 
-to_csv.to_csv('/Users/nick/Desktop/music data/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=False, index=False)
+to_csv.to_csv('/Users/nick/Desktop/music data/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=true, index=False)
 
 
 # music_csv_path = r'/Users/nick/Desktop/philosiphicus.csv'

@@ -46,7 +46,7 @@ const artistLegendG = verticalAreaSvg.append('g')
 const treeG = treeSvg.append('g')
   .attr('class', 'tree')
 
-loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
+loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2017.csv').then(data => {
   jsonData = data.jsonData;
   artistData = data.artistData;
   byWeekPlaysGenre = data.byWeekPlaysGenre;

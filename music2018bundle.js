@@ -49,7 +49,7 @@
     
         if (d.genre === "")
           return;
-        // console.log(d)
+        console.log(d);
         d.genre = d.genre
           .replace(/[[\]]/g, '')
           .split(',')
