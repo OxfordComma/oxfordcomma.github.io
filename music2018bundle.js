@@ -8,7 +8,7 @@
 
       const csvData = data[0];
       var jsonData = data[1];
-      const startDate = new Date('2018-01-01');
+      const startDate = new Date(new Date(csvData[0].listen_date).getFullYear().toString(), '00', '01');
 
       console.log(csvData);
       var sortedGenreList = [];
@@ -24,7 +24,10 @@
       var weekDict = {};
 
       // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
-      const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout', 'singersongwriter', 'acoustic'];
+      const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 
+        'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 
+        'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 
+        'chillout', 'singersongwriter', 'acoustic'];
 
       var genreHierarchy = d3$1.hierarchy(jsonData); 
       genreHierarchy.data = jsonData; 
@@ -49,7 +52,7 @@
     
         if (d.genre === "")
           return;
-        console.log(d);
+        // console.log(d)
         d.genre = d.genre
           .replace(/[[\]]/g, '')
           .split(',')
@@ -63,7 +66,7 @@
         // Convert time since Jan 1, 2018 from msec to # of weeks
         // 1000 msec/sec, 60 sec/min, 60 min/hr, 24 hr/day, 7 days/week, +1 so it starts on week 1
         d.weekNum = (parseInt((d.listen_date - startDate)/1000/60/60/24/7 + 1));
-        
+        // console.log(d.weekNum)
         const maxGenre = d.genre[0];
         
         if (totalPlaysArtist[d.artist] === undefined)
@@ -232,7 +235,8 @@
       width,
       height,
       numArtists,
-      onClick
+      onClick,
+      year
     } = props;
 
     const topArtistsTrimmed = topArtists.slice(0, numArtists);
@@ -246,8 +250,8 @@
 
     const xScale = d3$1.scaleTime()
       .domain([
-        new Date(2018, 0, 1), 
-        new Date(2018, 11, 31)])
+        new Date(year, 0, 1), 
+        new Date(year, 11, 31)])
       .range([0, height]);
       // .nice()
     
@@ -257,8 +261,8 @@
       .nice(); 
     
     const xAxis = d3$1.axisBottom(xScale)
-      // .ticks(9)
-      .tickSize(0)
+      .ticks(12)
+      .tickSize(-width/2)
       // .tickPadding(15)
       .tickFormat(d3.timeFormat('%B'));
     
@@ -270,9 +274,9 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-        .attr('transform', `translate(0,${-250})`)
+          .attr('transform', `translate(0,${0}), rotate(0)`)
         .selectAll('text')
-          .attr('text-anchor', 'end')
+          .attr('text-anchor', 'middle')
           .attr('transform', `rotate(-90)`);
 
     xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
@@ -511,7 +515,7 @@
     .attr('class', 'legend')
     .attr('transform', `translate(${5},${20})`);
 
-  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/output_12-5-18-10-45-41.csv').then(data => {
+  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
     jsonData = data.jsonData;
     artistData = data.artistData;
     byWeekPlaysGenre = data.byWeekPlaysGenre;
@@ -554,7 +558,8 @@
       width: 500,
       height: 850,
       numArtists: numStackedAreaArtists,
-      onClick: onClickArtist
+      onClick: onClickArtist,
+      year: 2018
     });
 
     artistLegendG.call(colorLegend, {

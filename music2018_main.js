@@ -40,7 +40,7 @@ const artistLegendG = verticalAreaSvg.append('g')
   .attr('class', 'legend')
   .attr('transform', `translate(${5},${20})`)
 
-loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/output_12-5-18-10-45-41.csv').then(data => {
+loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
   jsonData = data.jsonData;
   artistData = data.artistData;
   byWeekPlaysGenre = data.byWeekPlaysGenre;
@@ -83,7 +83,8 @@ const render = () => {
     width: 500,
     height: 850,
     numArtists: numStackedAreaArtists,
-    onClick: onClickArtist
+    onClick: onClickArtist,
+    year: 2018
   });
 
   artistLegendG.call(colorLegend, {

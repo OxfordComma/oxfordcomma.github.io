@@ -30,6 +30,10 @@ app.get('/music2018bundle.js', function(req, res) {
     res.sendFile(path.join(__dirname + '/music2018bundle.js'));
 });
 
+app.get('/music2017bundle.js', function(req, res) {
+    res.sendFile(path.join(__dirname + '/music2017bundle.js'));
+});
+
 app.get('/treebundle.js', function(req, res) {
     res.sendFile(path.join(__dirname + '/treebundle.js'));
 });

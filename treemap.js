@@ -90,7 +90,6 @@ export const treemap = (selection, props) => {
     return(bLen - aLen); 
   });
   
-  console.log(maxGenreDepth)
   const tree = treeLayout(root);
   var links = tree.links();   
  
@@ -111,7 +110,6 @@ export const treemap = (selection, props) => {
     .enter().append('path')
       .attr('d', linkPathGenerator)
 
-  console.log(root.descendants())
   const treeText = selection.selectAll('text').data(root.descendants());
   const treeTextEnter = treeText.enter().append('text')
     .attr('class', d => d.data.artist ? 'artist' : 'genre')

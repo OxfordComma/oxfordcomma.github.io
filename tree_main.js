@@ -148,7 +148,8 @@ const render = () => {
     width: 500,
     height: 850,
     numArtists: numStackedAreaArtists,
-    onClick: onClickArtist
+    onClick: onClickArtist,
+    year: 2017
   });
 
   artistLegendG.call(colorLegend, {

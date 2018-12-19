@@ -10,11 +10,13 @@ API_SECRET = "0472282104fce606c4d59bd659a66397"
 username = 'philosiphicus'
 password_hash = 'f22ec97b78a7ebf61bf26c6a0cedf014'
 
+year = 2018
+
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=username, password_hash=password_hash)
 user = network.get_user(username)
-start_date = datetime.datetime(2017, 1, 1, 0, 0, 0).strftime('%s')
-end_date = datetime.datetime(2017, 12, 31, 23, 59, 59).strftime('%s')
+start_date = datetime.datetime(year, 1, 1, 0, 0, 0).strftime('%s')
+end_date = datetime.datetime(year, 12, 31, 23, 59, 59).strftime('%s')
 
 total_tracks = []
 recent_tracks = user.get_recent_tracks(limit=1000, time_from=start_date, time_to = end_date)
@@ -51,28 +53,4 @@ for index, t in enumerate(total_tracks):
     }
     print(index)
 
-# for index, row in enumerate(to_csv):
-
-
-to_csv.to_csv('/Users/nick/Desktop/music data/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=true, index=False)
-
-
-# music_csv_path = r'/Users/nick/Desktop/philosiphicus.csv'
-# music_csv_names = ['artist', 'album', 'song', 'listen_date']
-# music_csv = pd.read_csv(music_csv_path, names=music_csv_names)
-# music_csv['genre'] = ''
-# # print(music_csv)
-# artists = {}
-# for idx, row in music_csv.iterrows():
-#     artist = row['artist']
-#     if artist not in artists.keys():
-#         print(artist)
-#         try:
-#             artists[artist] = genre_tags = [str(item[0]) for item in network.get_artist(row['artist']).get_top_tags(5)]
-#         except:
-#             print(artist + ' not found')
-#             continue
-
-#     music_csv.at[idx, 'genre'] = ','.join(artists[artist])
-
-# music_csv.to_csv('/Users/nick/Desktop/output_with_genre.csv')
+to_csv.to_csv('/Users/nick/Desktop/music data/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=True, index=False)

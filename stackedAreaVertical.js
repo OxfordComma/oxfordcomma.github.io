@@ -32,7 +32,8 @@ export const stackedAreaVertical = (selection, props) => {
     width,
     height,
     numArtists,
-    onClick
+    onClick,
+    year
   } = props;
 
   const topArtistsTrimmed = topArtists.slice(0, numArtists);
@@ -59,8 +60,8 @@ export const stackedAreaVertical = (selection, props) => {
 
   const xScale = scaleTime()
     .domain([
-      new Date(2018, 0, 1), 
-      new Date(2018, 11, 31)])
+      new Date(year, 0, 1), 
+      new Date(year, 11, 31)])
     .range([0, height])
     // .nice()
   
@@ -70,8 +71,8 @@ export const stackedAreaVertical = (selection, props) => {
     .nice(); 
   
   const xAxis = axisBottom(xScale)
-    // .ticks(9)
-    .tickSize(0)
+    .ticks(12)
+    .tickSize(-width/2)
     // .tickPadding(15)
     .tickFormat(d3.timeFormat('%B'));
   
@@ -83,9 +84,9 @@ export const stackedAreaVertical = (selection, props) => {
   xAxisGEnter
     .merge(xAxisG)
       .call(xAxis)
-      .attr('transform', `translate(0,${-250})`)
+        .attr('transform', `translate(0,${0}), rotate(0)`)
       .selectAll('text')
-        .attr('text-anchor', 'end')
+        .attr('text-anchor', 'middle')
         .attr('transform', `rotate(-90)`);
 
   xAxisGEnter.merge(xAxisG).selectAll('.domain').remove()

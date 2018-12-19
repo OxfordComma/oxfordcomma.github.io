@@ -6,7 +6,7 @@ export const loadData = url => {
 
     const csvData = data[0];
     var jsonData = data[1];
-    const startDate = new Date('2018-01-01');
+    const startDate = new Date(new Date(csvData[0].listen_date).getFullYear().toString(), '00', '01');
 
     console.log(csvData)
     var sortedGenreList = [];
@@ -24,7 +24,10 @@ export const loadData = url => {
     const numGenres = 50;
 
     // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
-    const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 'chillout', 'singersongwriter', 'acoustic'];
+    const genresToRemove = ['seenlive', 'femalevocalists', '', 'british', 'japanese', 'ofwgkta', 'irish', 'usa', 'australia', 
+      'australian', 'under2000 listeners', '90s', '80s', '70s', '60s', 'all', 'philadelphia', 'scottish', 'sanremo', 'newzealand', 
+      'twinkledaddies', 'sanremo2009', 'political', 'american', 'canadian', 'italian', 'psychadelic', 'instrumental', 'ambient', 
+      'chillout', 'singersongwriter', 'acoustic'];
 
     // Remove these character from the genre names
     const punctuationToRemove = [' ', '-'];
@@ -52,7 +55,7 @@ export const loadData = url => {
   
       if (d.genre === "")
         return;
-      console.log(d)
+      // console.log(d)
       d.genre = d.genre
         .replace(/[[\]]/g, '')
         .split(',')
@@ -66,7 +69,7 @@ export const loadData = url => {
       // Convert time since Jan 1, 2018 from msec to # of weeks
       // 1000 msec/sec, 60 sec/min, 60 min/hr, 24 hr/day, 7 days/week, +1 so it starts on week 1
       d.weekNum = (parseInt((d.listen_date - startDate)/1000/60/60/24/7 + 1));
-      
+      // console.log(d.weekNum)
       const maxGenre = d.genre[0];
       
       if (totalPlaysArtist[d.artist] === undefined)
