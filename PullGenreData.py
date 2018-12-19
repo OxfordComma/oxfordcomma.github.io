@@ -14,10 +14,10 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=username, password_hash=password_hash)
 user = network.get_user(username)
 start_date = datetime.datetime(2017, 1, 1, 0, 0, 0).strftime('%s')
-end_date = datetime.datetime(2018, 1, 1, 0, 0, 0).strftime('%s')
+end_date = datetime.datetime(2017, 12, 31, 23, 59, 59).strftime('%s')
 
 total_tracks = []
-recent_tracks = user.get_recent_tracks(limit=1000, time_from=start_date)
+recent_tracks = user.get_recent_tracks(limit=1000, time_from=start_date, time_to = end_date)
 total_tracks.extend(recent_tracks)
 while (True):
     recent_tracks = user.get_recent_tracks(limit=1000, time_from=start_date, time_to=recent_tracks[len(recent_tracks)-1].timestamp)
@@ -47,14 +47,14 @@ for index, t in enumerate(total_tracks):
         'album': t.album,
         'track': t.track.title,
         'listen_date': t.playback_date,
-        'genre': genres
+        'genre': ','.join(genres)
     }
     print(index)
 
 # for index, row in enumerate(to_csv):
 
 
-to_csv.to_csv('/Users/nick/Desktop/music data/output_12-5-18-10-45-41.csv', header=False, index=False)
+to_csv.to_csv('/Users/nick/Desktop/music data/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=False, index=False)
 
 
 # music_csv_path = r'/Users/nick/Desktop/philosiphicus.csv'

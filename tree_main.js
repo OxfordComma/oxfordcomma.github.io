@@ -32,8 +32,6 @@ const numStackedAreaArtists = 20;
 
 const verticalAreaSvg = select('.stacked-area-artist-vertical');
 const treeSvg = select('.tree')
-  // .attr('width', 1000)
-  // .attr('height', 2000)
 
 const colorValue = d => d.artist;
 const colorScale = scaleOrdinal();
@@ -48,7 +46,7 @@ const artistLegendG = verticalAreaSvg.append('g')
 const treeG = treeSvg.append('g')
   .attr('class', 'tree')
 
-loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/output_12-5-18-10-45-41.csv').then(data => {
+loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
   jsonData = data.jsonData;
   artistData = data.artistData;
   byWeekPlaysGenre = data.byWeekPlaysGenre;

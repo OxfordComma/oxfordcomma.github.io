@@ -52,7 +52,7 @@ export const loadData = url => {
   
       if (d.genre === "")
         return;
-
+      // console.log(d)
       d.genre = d.genre
         .replace(/[[\]]/g, '')
         .split(',')
