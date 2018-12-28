@@ -63,7 +63,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     // .attr('transform', `translate(${500/2}, 0), rotate(90)`);
 
   artistLegendG = verticalAreaSvg.append('g')
-    .attr('class', 'legend')
+    .attr('class', 'legend-container')
     .attr('transform', `translate(${5},${10})`)
   render();
 })
