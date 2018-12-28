@@ -16,7 +16,8 @@ export const treemap = (selection, props) => {
     height,
     colorScale,
     selectedLegendList,
-    onClick
+    onClickArtist,
+    onClickGenre
   } = props;
 
   //console.log(jsonData);
@@ -60,7 +61,10 @@ export const treemap = (selection, props) => {
     var aLen = a.children === undefined ? -1 : a.children.length;
     var bLen = b.children === undefined ? -1 : b.children.length;
     return(bLen - aLen); 
+    // console.log(a)
+    // return (b.depth - a.depth)
   });
+  console.log(root)
   
   const tree = treeLayout(root);
   var links = tree.links();   
@@ -94,11 +98,29 @@ export const treemap = (selection, props) => {
     .text(d => d.data.id); 
 
   treeText.merge(treeTextEnter)
-    .on('click', d => d.data.artist ? onClick(d.data.id) : true)
+    // .on('click', d => d.data.artist ? onClickArtist(d.data.id) : true)
+    .on('click', d => {
+      var artists = d.leaves()
+      return d.data.artist ? 
+        artists.forEach(l => onClickArtist(l.data.id)) :
+        onClickGenre(artists.map(l => l.data.id))
+
+
+      // console.log(d.leaves())
+      // (d.data.artist ? onClickArtist(d.data.id) : d.descendants().forEach(l => onClickArtist(l.data.id)))
+    })
     .transition(200)
       .attr('opacity', d => {
-          console.log(d);
-          return (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2
-        })
+        const path = root.path(d).map(p => p.data.id)
+
+        // console.log(d.descendants());
+        var childNames = d.descendants().map(c => c.data.id)
+        // console.log(childNames)
+        return (
+          selectedLegendList.length == 0 || 
+          // selectedLegendList.includes(d.data.id) 
+          selectedLegendList.some(r=> childNames.indexOf(r) >= 0) 
+          ? 1 : 0.2
+        )})
 
 };

@@ -169,7 +169,8 @@
       height,
       colorScale,
       selectedLegendList,
-      onClick
+      onClickArtist,
+      onClickGenre
     } = props;
 
     //console.log(jsonData);
@@ -213,7 +214,10 @@
       var aLen = a.children === undefined ? -1 : a.children.length;
       var bLen = b.children === undefined ? -1 : b.children.length;
       return(bLen - aLen); 
+      // console.log(a)
+      // return (b.depth - a.depth)
     });
+    console.log(root);
     
     const tree = treeLayout(root);
     var links = tree.links();   
@@ -247,12 +251,30 @@
       .text(d => d.data.id); 
 
     treeText.merge(treeTextEnter)
-      .on('click', d => d.data.artist ? onClick(d.data.id) : true)
+      // .on('click', d => d.data.artist ? onClickArtist(d.data.id) : true)
+      .on('click', d => {
+        var artists = d.leaves();
+        return d.data.artist ? 
+          artists.forEach(l => onClickArtist(l.data.id)) :
+          onClickGenre(artists.map(l => l.data.id))
+
+
+        // console.log(d.leaves())
+        // (d.data.artist ? onClickArtist(d.data.id) : d.descendants().forEach(l => onClickArtist(l.data.id)))
+      })
       .transition(200)
         .attr('opacity', d => {
-            console.log(d);
-            return (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2
-          });
+          const path = root.path(d).map(p => p.data.id);
+
+          // console.log(d.descendants());
+          var childNames = d.descendants().map(c => c.data.id);
+          // console.log(childNames)
+          return (
+            selectedLegendList.length == 0 || 
+            // selectedLegendList.includes(d.data.id) 
+            selectedLegendList.some(r=> childNames.indexOf(r) >= 0) 
+            ? 1 : 0.2
+          )});
 
   };
 
@@ -346,7 +368,6 @@
       .offset(d3.stackOffsetWiggle);
 
     var series = stack(dataToStack);
-    // console.log(series)
     const areaGenerator = d3$1.area()
       .x(d => xScale(new Date(year, 0, (d.data.week - 1) * 7)))
       .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
@@ -354,16 +375,21 @@
       .curve(d3$1.curveBasis);
     
     const lines = selection.selectAll('.line-path').data(series);
-    const linesEnter = lines.enter().append('path')
+    const linesEnter = lines.enter()
+      .append('path')
         .attr('class', 'line-path') 
-        .attr('fill', d => colorScale(d.key))
-        .attr('stroke', 'black');
-        
+        .attr('fill', d => colorScale(d.key));
+        // .attr('stroke', 'black')
+
     lines.merge(linesEnter)
       .on('click', d => onClick(d.key))
+      .attr('d', areaGenerator)
+      .append('title')
+        .text(d => d.key);
+    
+    lines.merge(linesEnter)
       .transition()
         .duration(200)
-        .attr('d', areaGenerator)
         .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
         .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
@@ -394,7 +420,7 @@
 
   var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
   var artistColorScale, genreColorScale;
-  var topArtists, topGenres;
+  var topArtists, topArtistsTrimmed, topGenres;
   var playScale;
   var selectedArtists = []; 
   var deepestGenresByArtist;
@@ -413,6 +439,8 @@
     topArtists = data.topArtists;
     deepestGenresByArtist = data.deepestGenresByArtist;
     totalPlaysArtist = data.totalPlaysArtist;
+
+
 
     treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
     treeWidth = document.getElementById('tree').clientWidth;
@@ -440,8 +468,18 @@
     treeG = treeSvg.append('g')
       .attr('class', 'tree');
 
+    
+
+    topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
+    const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
+    addArtistsToTree(topArtistsTrimmed, jsonData);
+    removeEmptyLeaves(jsonData);
+    
+    topArtistsTrimmed = d3$1.hierarchy(jsonData).leaves().map(d=>d.data.id);
+
+
     artistColorScale = d3$1.scaleOrdinal()
-      .domain(topArtists.slice(0, numStackedAreaArtists));
+      .domain(topArtistsTrimmed);
 
     const n = artistColorScale.domain().length;
     
@@ -455,15 +493,18 @@
     playScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
       .domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
 
-    const topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
-    const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
-    addArtistsToTree(topArtistsTrimmed, jsonData);
-    removeEmptyLeaves(jsonData);
 
     render();
   });
 
+  const onClickGenre = d => {
+    selectedArtists = selectedArtists.sort().join(',') === d.sort().join(',') ? [] : d;
+    console.log(selectedArtists);
+    render(); 
+  };
+
   const onClickArtist = d => {
+
     if (!selectedArtists.includes(d))
       selectedArtists.push(d);
     else
@@ -503,12 +544,13 @@
       height: treeHeight,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
-      onClick: onClickArtist
+      onClickArtist: onClickArtist,
+      onClickGenre: onClickGenre
     });
 
     verticalAreaG.call(stackedAreaVertical, {
       dataToStack: byWeekPlaysArtist,
-      topArtists: topArtists,
+      topArtists: topArtistsTrimmed,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
       width: areaWidth,

@@ -34,7 +34,6 @@ h1 {
 .tree path {
   fill: none;
   stroke: #a8a1dd;
-  cursor: pointer;
 }
 
 .tree text {
@@ -44,7 +43,7 @@ h1 {
    -1px  1px 3px white,
     1px -1px 3px white,
     1px  1px 3px white;
-  /*cursor: pointer;*/
+  cursor: pointer;
 }
 
 .line-path {
@@ -58,9 +57,9 @@ h1 {
   fill: lightblue;
 }
 
-.artist {
+/*.artist {
   cursor: pointer;
-}
+}*/
 
 .x-axis {
   font-size: 1.4em;

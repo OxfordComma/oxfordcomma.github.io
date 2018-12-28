@@ -19,6 +19,7 @@ import {
   sum,
   time,
   stackOffsetWiggle,
+  stackOrderAscending,
   csv
 } from 'd3';
 import { colorLegend } from './colorLegend';
@@ -132,10 +133,9 @@ export const stackedAreaVertical = (selection, props) => {
   
   var stack = d3.stack(dataToStack)
     .keys(topArtistsTrimmed)
-    .offset(d3.stackOffsetWiggle);
+    .offset(d3.stackOffsetWiggle)
 
   var series = stack(dataToStack);
-  // console.log(series)
   const areaGenerator = area()
     .x(d => xScale(new Date(year, 0, (d.data.week - 1) * 7)))
     .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
@@ -146,16 +146,21 @@ export const stackedAreaVertical = (selection, props) => {
     yValue(d.values[d.values.length - 1]);
   
   const lines = selection.selectAll('.line-path').data(series);
-  const linesEnter = lines.enter().append('path')
+  const linesEnter = lines.enter()
+    .append('path')
       .attr('class', 'line-path') 
       .attr('fill', d => colorScale(d.key))
-      .attr('stroke', 'black')
-      
+      // .attr('stroke', 'black')
+
   lines.merge(linesEnter)
     .on('click', d => onClick(d.key))
+    .attr('d', areaGenerator)
+    .append('title')
+      .text(d => d.key)
+  
+  lines.merge(linesEnter)
     .transition()
       .duration(200)
-      .attr('d', areaGenerator)
       .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
       .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 

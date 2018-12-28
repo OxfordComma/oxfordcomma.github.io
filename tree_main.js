@@ -21,7 +21,7 @@ import { colorLegend } from './colorLegend';
 
 var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
 var artistColorScale, genreColorScale;
-var topArtists, topGenres;
+var topArtists, topArtistsTrimmed, topGenres;
 var playScale;
 var selectedArtists = []; 
 var selectedGenre;
@@ -42,6 +42,8 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   topArtists = data.topArtists;
   deepestGenresByArtist = data.deepestGenresByArtist;
   totalPlaysArtist = data.totalPlaysArtist;
+
+
 
   treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
   treeWidth = document.getElementById('tree').clientWidth;
@@ -69,8 +71,18 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   treeG = treeSvg.append('g')
     .attr('class', 'tree')
 
+  
+
+  topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
+  const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
+  addArtistsToTree(topArtistsTrimmed, jsonData);
+  removeEmptyLeaves(jsonData)
+  
+  topArtistsTrimmed = hierarchy(jsonData).leaves().map(d=>d.data.id);
+
+
   artistColorScale = scaleOrdinal()
-    .domain(topArtists.slice(0, numStackedAreaArtists));
+    .domain(topArtistsTrimmed);
 
   const n = artistColorScale.domain().length;
   
@@ -84,21 +96,18 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   playScale = scaleSequential(interpolatePlasma)
     .domain([0, max(Object.values(totalPlaysArtist)) + 100]);
 
-  const topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
-  const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
-  addArtistsToTree(topArtistsTrimmed, jsonData);
-  removeEmptyLeaves(jsonData)
 
   render();
 })
 
 const onClickGenre = d => {
-  console.log('selected genre: ' + d);
-  selectedGenre = d;
+  selectedArtists = selectedArtists.sort().join(',') === d.sort().join(',') ? [] : d;
+  console.log(selectedArtists)
   render(); 
 };
 
 const onClickArtist = d => {
+
   if (!selectedArtists.includes(d))
     selectedArtists.push(d);
   else
@@ -138,12 +147,13 @@ const render = () => {
     height: treeHeight,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
-    onClick: onClickArtist
+    onClickArtist: onClickArtist,
+    onClickGenre: onClickGenre
   });
 
   verticalAreaG.call(stackedAreaVertical, {
     dataToStack: byWeekPlaysArtist,
-    topArtists: topArtists,
+    topArtists: topArtistsTrimmed,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
     width: areaWidth,
