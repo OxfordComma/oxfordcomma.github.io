@@ -362,11 +362,19 @@
   var playColorScale;
   var selectedArtists = []; 
   var deepestGenresByArtist;
-  var numStackedAreaArtists = 20;
+  var numStackedAreaArtists = 30;
+  const colorScale = d3$1.scaleOrdinal();
 
-  var verticalAreaG, artistLegendG;
+  const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical');
 
-  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
+  const verticalAreaG = verticalAreaSvg.append('g')
+    .attr('transform', `translate(${250}, 0), rotate(90)`);
+
+  const artistLegendG = verticalAreaSvg.append('g')
+    .attr('class', 'legend')
+    .attr('transform', `translate(${5},${20})`);
+
+  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2017.csv').then(data => {
     jsonData = data.jsonData;
     artistData = data.artistData;
     byWeekPlaysGenre = data.byWeekPlaysGenre;
@@ -388,19 +396,6 @@
 
     playColorScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
   		.domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
-
-    const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical')
-      .attr('height', document.body.clientHeight)
-      .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth);
-      // .attr('transform', `translate(0, 0)`);
-
-    verticalAreaG = verticalAreaSvg.append('g')
-      .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth/2}, 0), rotate(90)`);
-      // .attr('transform', `translate(${500/2}, 0), rotate(90)`);
-
-    artistLegendG = verticalAreaSvg.append('g')
-      .attr('class', 'legend')
-      .attr('transform', `translate(${5},${10})`);
     render();
   });
 
@@ -419,11 +414,11 @@
       topArtists: topArtists,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
-      width: document.getElementById('stacked-area-artist-vertical').clientWidth,
-      height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
+      width: 500,
+      height: 850,
       numArtists: numStackedAreaArtists,
       onClick: onClickArtist,
-      year: 2018
+      year: 2017
     });
 
     artistLegendG.call(colorLegend, {
@@ -439,4 +434,4 @@
   };
 
 }(d3));
-//# sourceMappingURL=music2018bundle.js.map
+//# sourceMappingURL=music2017bundle.js.map

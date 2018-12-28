@@ -16,40 +16,14 @@ export const treemap = (selection, props) => {
     height,
     colorScale,
     selectedLegendList,
-    numArtists,
     onClick
   } = props;
 
-  const addArtistsToTree = function(artists, t) {
-    artists.forEach(a => (deepestGenresByArtist[a] == t.id ? t.children.push({id: a, artist: true, children: []}) : 1))
-    if (t.children)
-      t.children.forEach(c => addArtistsToTree(artists, c))
-  }
+  //console.log(jsonData);
 
-  const removeEmptyLeaves = function(t) {
-    if (t.children.length > 0)
-    {
-      var toRemove = []
-      t.children.forEach(c => {
-        removeEmptyLeaves(c)
-
-        if (!c.artist && c.children.length == 0)
-        {
-          toRemove.push(c.id)
-        }
-      })
-      if (toRemove)
-      {
-        // console.log('to remove: ' + toRemove)
-        // console.log(t.children)
-        t.children = t.children.filter(c => !toRemove.includes(c.id))
-        // console.log(t.children)
-      }
-    }
-  }
-
-  const topArtistsTrimmed = topArtists.slice(0, numArtists);
-  const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
+  // const topArtistsTrimmed = topArtists.slice(0, numArtists);
+  // console.log(topArtistsTrimmed)
+  const topGenresTrimmed = topArtists.map(a => deepestGenresByArtist[a])
   var maxGenreDepth = 0;
   
   const treeLayout = cluster()
@@ -58,9 +32,7 @@ export const treemap = (selection, props) => {
       return (a.parent == b.parent ? 1 : 1); 
     })
 
-  // addArtistsToTree(topArtistsTrimmed, jsonData);
-  // console.log(jsonData)
-  // removeEmptyLeaves(jsonData)
+
   var root = hierarchy(jsonData); 
 
   root.descendants().forEach(d => {
@@ -97,7 +69,7 @@ export const treemap = (selection, props) => {
     .x(d => d.y)
     .y(d => d.x);
 
-  const treeSpread = 150
+  const treeSpread = 130;
 
   links.forEach(d => {
     if (d.target.data.artist)
@@ -123,7 +95,10 @@ export const treemap = (selection, props) => {
 
   treeText.merge(treeTextEnter)
     .on('click', d => d.data.artist ? onClick(d.data.id) : true)
-
     .transition(200)
-      .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2)
+      .attr('opacity', d => {
+          console.log(d);
+          return (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2
+        })
+
 };

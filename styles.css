@@ -10,67 +10,66 @@ body {
   font-family: 'Playfair Display'
 }
 
+.navbar {
+  margin-bottom: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+.p-0 {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 h1 {
   font-size: 3.2em;
-  text-align: left;
+  text-align: center;
 }
 
 /*Tree*/
 .tree path {
   fill: none;
   stroke: #a8a1dd;
+  cursor: pointer;
 }
 
 .tree text {
-  font-size: 1.4em;
+  font-size: 1.2em;
   text-shadow:
    -1px -1px 3px white,
    -1px  1px 3px white,
     1px -1px 3px white,
     1px  1px 3px white;
-}
-
-.line-path:hover {
-  fill: lightblue;
-}
-
-/*Stacked area*/
-.legend {
-  font-size: 0.8em;
-  cursor: pointer;
-  position: fixed;
-}
-
-.artist {
-  cursor: pointer;
-}
-.tick text {
-  font-size: 1.4em;
-  fill: #635F5D;
-  font-family: 'Playfair Display';
-}
-
-.tick line {
-  /*stroke: #C0C0BB;*/
-}
-
-.title {
-  font-size: 2.7em;
-  /*fill: #635F5D;*/
-  text-anchor: middle;
-}
-
-.axis-label {
-  font-size: 3em;
-  fill: #8E8883;
+  /*cursor: pointer;*/
 }
 
 .line-path {
   stroke-linejoin: round;
   stroke-linecap: round;
   mix-blend-mode: multiply;
+  cursor: pointer;
 }
 
-.navbar {
-  margin-bottom: 0;
+.line-path:hover {
+  fill: lightblue;
+}
+
+.artist {
+  cursor: pointer;
+}
+
+.x-axis {
+  font-size: 1.4em;
+  fill: #635F5D;
+  font-family: 'Playfair Display';
+}
+
+.legend {
+  font-size: 1em;
+  cursor: pointer;
+  position: fixed;
 }

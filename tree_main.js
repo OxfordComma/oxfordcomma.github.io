@@ -28,25 +28,12 @@ var selectedGenre;
 var deepestGenresByArtist;
 var byWeekPlays;
 
-const numStackedAreaArtists = 20;
+var verticalAreaG, artistLegendG, treeG;
+var treeWidth, treeHeight, areaWidth, areaHeight;
 
-const verticalAreaSvg = select('.stacked-area-artist-vertical');
-const treeSvg = select('.tree')
+const numStackedAreaArtists = 30;
 
-const colorValue = d => d.artist;
-const colorScale = scaleOrdinal();
-
-const verticalAreaG = verticalAreaSvg.append('g')
-  .attr('transform', `translate(${250}, 0), rotate(90)`);
-
-const artistLegendG = verticalAreaSvg.append('g')
-  .attr('class', 'legend')
-  .attr('transform', `translate(${5},${20})`)
-
-const treeG = treeSvg.append('g')
-  .attr('class', 'tree')
-
-loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2017.csv').then(data => {
+loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
   jsonData = data.jsonData;
   artistData = data.artistData;
   byWeekPlaysGenre = data.byWeekPlaysGenre;
@@ -56,10 +43,34 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   deepestGenresByArtist = data.deepestGenresByArtist;
   totalPlaysArtist = data.totalPlaysArtist;
 
+  treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
+  treeWidth = document.getElementById('tree').clientWidth;
+
+  areaHeight = treeHeight;  
+  areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+
+  const verticalAreaSvg = select('.stacked-area-artist-vertical')
+    .attr('height', areaHeight)
+    .attr('width', areaWidth)
+
+  const treeSvg = select('.tree')
+    .attr('height', treeHeight)
+    .attr('width', treeWidth)
+
+  // console.log(treeHeight)
+
+  verticalAreaG = verticalAreaSvg.append('g')
+    .attr('transform', `translate(${areaWidth/2}, 0), rotate(90)`);
+
+  artistLegendG = verticalAreaSvg.append('g')
+    .attr('class', 'legend')
+    .attr('transform', `translate(${5},${5})`)
+
+  treeG = treeSvg.append('g')
+    .attr('class', 'tree')
 
   artistColorScale = scaleOrdinal()
     .domain(topArtists.slice(0, numStackedAreaArtists));
-
 
   const n = artistColorScale.domain().length;
   
@@ -73,12 +84,10 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   playScale = scaleSequential(interpolatePlasma)
     .domain([0, max(Object.values(totalPlaysArtist)) + 100]);
 
-  const topArtistsTrimmed = topArtists.slice(0, 20);
+  const topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
   const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
   addArtistsToTree(topArtistsTrimmed, jsonData);
-  // console.log(jsonData)
   removeEmptyLeaves(jsonData)
-
 
   render();
 })
@@ -105,26 +114,19 @@ const addArtistsToTree = function(artists, t) {
   }
 
 const removeEmptyLeaves = function(t) {
-  if (t.children.length > 0)
-  {
-    var toRemove = []
-    t.children.forEach(c => {
-      removeEmptyLeaves(c)
-
-      if (!c.artist && c.children.length == 0)
-      {
-        toRemove.push(c.id)
-      }
-    })
-    if (toRemove)
+    if (t.children.length > 0)
     {
-      // console.log('to remove: ' + toRemove)
-      // console.log(t.children)
-      t.children = t.children.filter(c => !toRemove.includes(c.id))
-      // console.log(t.children)
+      var toRemove = []
+      t.children.forEach(c => {
+        removeEmptyLeaves(c)
+
+        if (!c.artist && c.children.length == 0)
+          toRemove.push(c.id)
+      })
+      if (toRemove)
+        t.children = t.children.filter(c => !toRemove.includes(c.id))
     }
   }
-}
 
 const render = () => {
   treeG.call(treemap, {
@@ -132,11 +134,10 @@ const render = () => {
     deepestGenresByArtist,
     totalPlaysArtist,
     topArtists,
-    width: 500,
-    height: 800,
+    width: treeWidth,
+    height: treeHeight,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
-    numArtists: 20,
     onClick: onClickArtist
   });
 
@@ -145,21 +146,21 @@ const render = () => {
     topArtists: topArtists,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
-    width: 500,
-    height: 850,
+    width: areaWidth,
+    height: document.getElementById('tree').clientHeight,
     numArtists: numStackedAreaArtists,
     onClick: onClickArtist,
-    year: 2017
+    year: 2018
   });
 
-  artistLegendG.call(colorLegend, {
-    colorScale: artistColorScale,
-    circleRadius: 5,
-    spacing: 15,
-    textOffset: 12,
-    backgroundRectWidth: 135,
-    onClick: onClickArtist,
-    selectedLegendList: selectedArtists,
-    numArtists: numStackedAreaArtists
-  });
+  // artistLegendG.call(colorLegend, {
+  //   colorScale: artistColorScale,
+  //   circleRadius: 5,
+  //   spacing: 15,
+  //   textOffset: 12,
+  //   backgroundRectWidth: 135,
+  //   onClick: onClickArtist,
+  //   selectedLegendList: selectedArtists,
+  //   numArtists: numStackedAreaArtists
+  // });
 }

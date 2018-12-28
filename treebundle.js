@@ -169,12 +169,14 @@
       height,
       colorScale,
       selectedLegendList,
-      numArtists,
       onClick
     } = props;
 
-    const topArtistsTrimmed = topArtists.slice(0, numArtists);
-    const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
+    //console.log(jsonData);
+
+    // const topArtistsTrimmed = topArtists.slice(0, numArtists);
+    // console.log(topArtistsTrimmed)
+    const topGenresTrimmed = topArtists.map(a => deepestGenresByArtist[a]);
     var maxGenreDepth = 0;
     
     const treeLayout = d3$1.cluster()
@@ -183,9 +185,7 @@
         return (a.parent == b.parent ? 1 : 1); 
       });
 
-    // addArtistsToTree(topArtistsTrimmed, jsonData);
-    // console.log(jsonData)
-    // removeEmptyLeaves(jsonData)
+
     var root = d3$1.hierarchy(jsonData); 
 
     root.descendants().forEach(d => {
@@ -222,7 +222,7 @@
       .x(d => d.y)
       .y(d => d.x);
 
-    const treeSpread = 150;
+    const treeSpread = 130;
 
     links.forEach(d => {
       if (d.target.data.artist)
@@ -248,72 +248,12 @@
 
     treeText.merge(treeTextEnter)
       .on('click', d => d.data.artist ? onClick(d.data.id) : true)
-
       .transition(200)
-        .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2);
-  };
+        .attr('opacity', d => {
+            console.log(d);
+            return (selectedLegendList.length == 0 || selectedLegendList.includes(d.data.id)) ? 1 : 0.2
+          });
 
-  const colorLegend = (selection, props) => {
-    const {
-      colorScale,
-      circleRadius,
-      spacing,
-      textOffset,
-      backgroundRectWidth,
-      onClick,
-      selectedLegendList,
-      numArtists
-    } = props;      
-
-    const backgroundRect = selection.selectAll('rect')
-      .data([null]);             
-    
-    const n = colorScale.domain().length; 
-
-    backgroundRect.enter().append('rect')
-      .merge(backgroundRect)
-        .attr('x', -circleRadius * 2)   
-        .attr('y', -circleRadius * 2)   
-        .attr('rx', circleRadius * 2)   
-        .attr('width', backgroundRectWidth)
-        .attr('height', spacing * n + circleRadius * 2) 
-        .attr('fill', 'white')
-        .attr('opacity', 0);
-
-    const groups = selection.selectAll('.legend')
-      .data(colorScale.domain().slice(0, numArtists));
-    
-    const groupsEnter = groups
-      .enter().append('g')
-        .attr('class', 'legend');
-    
-    groupsEnter
-      .merge(groups)
-        .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
-        .on('click', onClick);
-        
-    groupsEnter
-      .merge(groups)
-        .transition().duration(200)
-        .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
-        .attr('opacity', d =>
-        {
-          // console.log(!selectedLegendItem);
-          return (selectedLegendList.length == 0 || selectedLegendList.includes(d)) ? 1 : 0.2;
-        });
-
-    groups.exit().remove();
-    
-    groupsEnter.append('circle')
-      .merge(groups.select('circle')) 
-        .attr('r', circleRadius)
-        .attr('fill', colorScale);      
-    
-    groupsEnter.append('text')
-      .merge(groups.select('text'))   
-        .text(d => d)
-        .attr('dy', '0.32em')
-        .attr('x', textOffset);
   };
 
   // Mouseover line adapted from here
@@ -344,8 +284,9 @@
       .domain([
         new Date(year, 0, 1), 
         new Date(year, 11, 31)])
-      .range([0, height]);
-      // .nice()
+        // getDateFromWeek(max(Object.keys(dataToStack).map(d => parseInt(d, 10))))])
+      .range([0, height])
+      .nice();
     
     const yScale = d3$1.scaleLinear()
       .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
@@ -354,7 +295,7 @@
     
     const xAxis = d3$1.axisBottom(xScale)
       .ticks(12)
-      .tickSize(-width/2)
+      .tickSize(0)
       // .tickPadding(15)
       .tickFormat(d3.timeFormat('%B'));
     
@@ -366,9 +307,9 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-          .attr('transform', `translate(0,${0}), rotate(0)`)
+          .attr('transform', `translate(0,${-width/2}), rotate(0)`)
         .selectAll('text')
-          .attr('text-anchor', 'middle')
+          .attr('text-anchor', 'end')
           .attr('transform', `rotate(-90)`);
 
     xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
@@ -407,7 +348,7 @@
     var series = stack(dataToStack);
     // console.log(series)
     const areaGenerator = d3$1.area()
-      .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+      .x(d => xScale(new Date(year, 0, (d.data.week - 1) * 7)))
       .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
       .y1(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? d[1] - d[0] : d[1]))
       .curve(d3$1.curveBasis);
@@ -447,146 +388,8 @@
           }
         });
       });
-      // console.log(annotations);
-    //   annotations.map(function(d){ d.color = "#8a2d96"; return d});
-    //   const makeAnnotations = d3.annotation()
-    //     .type(d3.annotationCalloutCurve)
-    //     .annotations(annotations)
-    //     // .editMode(true)
-    //     .notePadding(5)
-
-    //   var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
-    //   // annotationG.enter()
-    //     .append("g")
-    //     .attr("class", "annotation-group")
-    //     .call(makeAnnotations)
     });
 
-    // const annotations = [
-    // {
-    //   note: {
-    //     title: "Tiny Moving Parts and Mom Jeans",
-    //     label: "February 10th at the Sinclair"
-    //   },
-    //   x: 230, y: xScale(new Date('10-Feb-2018')), dy: 65, dx: -117, 
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // }, 
-    // {
-    //   note: {
-    //     title: "Sorority Noise",
-    //     label: "April 4th at the Paradise Rock Club"
-    //   },
-    //   x: 160, y: xScale(new Date('4-Apr-2018')), dy: -50, dx: -65,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-25, 0]]
-    //   }
-    // },
-    // {
-    //   note: {
-    //     title: "Lord Huron",
-    //     label: "April 30th at the House of  Blues"
-    //   },
-    //   x: 220, y: xScale(new Date('30-Apr-2018')), dy: -50, dx: -115,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-75, 0]]
-    //   }
-    // },   
-    // {
-    //   note: {
-    //     title: "The Killers, The National, and Julien Baker",
-    //     label: "May 23rd-25th at Boston Calling"
-    //   },
-    //   x: 120, y: xScale(new Date('24-May-2018')), dy: -50, dx: -15,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // },   
-    // // {
-    // //   note: {
-    // //     title: "The National",
-    // //     label: "May 24th at Boston Calling"
-    // //   },
-    // //   x: 210, y: 1200, dy: 0, dx: -150
-    // // },   
-    // // {
-    // //   note: {
-    // //     title: "Julien Baker",
-    // //     label: "May 25th at Boston Calling"
-    // //   },
-    // //   x: 210, y: 1250, dy: 0, dx: -150
-    // // },   
-    // {
-    //   note: {
-    //     title: "Japanese Breakfast",
-    //     label: "June 1st at the Sinclair"
-    //   },
-    //   x: 150, y: xScale(new Date('1-Jun-2018')), dy: 30, dx: -32,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // },   
-    // {
-    //   note: {
-    //     title: "Bon Iver",
-    //     label: "August 5th at the LA Bowl"
-    //   },
-    //   x: 230, y: xScale(new Date('5-Aug-2018')), dy: 70, dx: -125,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // },   
-    // {
-    //   note: {
-    //     title: "Mitski",
-    //     label: "October 20th at the House of Blues"
-    //   },
-    //   x: 210, y: 2150, dy: 0, dx: -150,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // },   
-    // {
-    //   note: {
-    //     title: "Mom Jeans (again)",
-    //     label: "November 1st at the ONCE Ballroom"
-    //   },
-    //   x: 210, y: 2350, dy: 0, dx: -150,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // }, 
-    // {
-    //   note: {
-    //     title: "Pinegrove",
-    //     label: "November 24th at the Sinclair"
-    //   },
-    //   x: 210, y: 2500, dy: 0, dx: -150,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // },
-    // {
-    //   note: {
-    //     title: "Tiny Moving Parts (again)",
-    //     label: "November 25th at the House of Blues"
-    //   },
-    //   x: 210, y: 2750, dy: 0, dx: -150,
-    //   connector: {
-    //     curve: d3.curveLinear,
-    //     points: [[-50, 0]]
-    //   }
-    // }].map(function(d){ d.color = "#8a2d96"; return d})
   };
 
   var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
@@ -596,23 +399,12 @@
   var selectedArtists = []; 
   var deepestGenresByArtist;
 
-  const numStackedAreaArtists = 20;
+  var verticalAreaG, artistLegendG, treeG;
+  var treeWidth, treeHeight, areaWidth, areaHeight;
 
-  const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical');
-  const treeSvg = d3$1.select('.tree');
-  const colorScale = d3$1.scaleOrdinal();
+  const numStackedAreaArtists = 30;
 
-  const verticalAreaG = verticalAreaSvg.append('g')
-    .attr('transform', `translate(${250}, 0), rotate(90)`);
-
-  const artistLegendG = verticalAreaSvg.append('g')
-    .attr('class', 'legend')
-    .attr('transform', `translate(${5},${20})`);
-
-  const treeG = treeSvg.append('g')
-    .attr('class', 'tree');
-
-  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2017.csv').then(data => {
+  loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
     jsonData = data.jsonData;
     artistData = data.artistData;
     byWeekPlaysGenre = data.byWeekPlaysGenre;
@@ -622,10 +414,34 @@
     deepestGenresByArtist = data.deepestGenresByArtist;
     totalPlaysArtist = data.totalPlaysArtist;
 
+    treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
+    treeWidth = document.getElementById('tree').clientWidth;
+
+    areaHeight = treeHeight;  
+    areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+
+    const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical')
+      .attr('height', areaHeight)
+      .attr('width', areaWidth);
+
+    const treeSvg = d3$1.select('.tree')
+      .attr('height', treeHeight)
+      .attr('width', treeWidth);
+
+    // console.log(treeHeight)
+
+    verticalAreaG = verticalAreaSvg.append('g')
+      .attr('transform', `translate(${areaWidth/2}, 0), rotate(90)`);
+
+    artistLegendG = verticalAreaSvg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', `translate(${5},${5})`);
+
+    treeG = treeSvg.append('g')
+      .attr('class', 'tree');
 
     artistColorScale = d3$1.scaleOrdinal()
       .domain(topArtists.slice(0, numStackedAreaArtists));
-
 
     const n = artistColorScale.domain().length;
     
@@ -639,12 +455,10 @@
     playScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
       .domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
 
-    const topArtistsTrimmed = topArtists.slice(0, 20);
+    const topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
     const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
     addArtistsToTree(topArtistsTrimmed, jsonData);
-    // console.log(jsonData)
     removeEmptyLeaves(jsonData);
-
 
     render();
   });
@@ -665,26 +479,19 @@
     };
 
   const removeEmptyLeaves = function(t) {
-    if (t.children.length > 0)
-    {
-      var toRemove = [];
-      t.children.forEach(c => {
-        removeEmptyLeaves(c);
-
-        if (!c.artist && c.children.length == 0)
-        {
-          toRemove.push(c.id);
-        }
-      });
-      if (toRemove)
+      if (t.children.length > 0)
       {
-        // console.log('to remove: ' + toRemove)
-        // console.log(t.children)
-        t.children = t.children.filter(c => !toRemove.includes(c.id));
-        // console.log(t.children)
+        var toRemove = [];
+        t.children.forEach(c => {
+          removeEmptyLeaves(c);
+
+          if (!c.artist && c.children.length == 0)
+            toRemove.push(c.id);
+        });
+        if (toRemove)
+          t.children = t.children.filter(c => !toRemove.includes(c.id));
       }
-    }
-  };
+    };
 
   const render = () => {
     treeG.call(treemap, {
@@ -692,11 +499,10 @@
       deepestGenresByArtist,
       totalPlaysArtist,
       topArtists,
-      width: 500,
-      height: 800,
+      width: treeWidth,
+      height: treeHeight,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
-      numArtists: 20,
       onClick: onClickArtist
     });
 
@@ -705,23 +511,23 @@
       topArtists: topArtists,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
-      width: 500,
-      height: 850,
+      width: areaWidth,
+      height: document.getElementById('tree').clientHeight,
       numArtists: numStackedAreaArtists,
       onClick: onClickArtist,
-      year: 2017
+      year: 2018
     });
 
-    artistLegendG.call(colorLegend, {
-      colorScale: artistColorScale,
-      circleRadius: 5,
-      spacing: 15,
-      textOffset: 12,
-      backgroundRectWidth: 135,
-      onClick: onClickArtist,
-      selectedLegendList: selectedArtists,
-      numArtists: numStackedAreaArtists
-    });
+    // artistLegendG.call(colorLegend, {
+    //   colorScale: artistColorScale,
+    //   circleRadius: 5,
+    //   spacing: 15,
+    //   textOffset: 12,
+    //   backgroundRectWidth: 135,
+    //   onClick: onClickArtist,
+    //   selectedLegendList: selectedArtists,
+    //   numArtists: numStackedAreaArtists
+    // });
   };
 
 }(d3));

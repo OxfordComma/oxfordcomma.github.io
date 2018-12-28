@@ -51,19 +51,19 @@ export const stackedAreaVertical = (selection, props) => {
   const yAxisLabel = 'Plays';
   
   // X-axis and scale
-  // console.log(new Date(2018, 0, (extent(dataToStack, xValue)[0] - 1) * 7 + 1))
   // This converts from the week scale to a day scale
   const getDateFromWeek = (weekNumber) => {
     const numberOfDays = 7*(weekNumber-1)+1;
-    return new Date(2018, 0, numberOfDays);
+    return new Date(year, 0, numberOfDays);
   }
 
   const xScale = scaleTime()
     .domain([
       new Date(year, 0, 1), 
       new Date(year, 11, 31)])
+      // getDateFromWeek(max(Object.keys(dataToStack).map(d => parseInt(d, 10))))])
     .range([0, height])
-    // .nice()
+    .nice()
   
   const yScale = scaleLinear()
     .domain([0, max(dataToStack.map(d => sum(Object.values(d))))])
@@ -72,7 +72,7 @@ export const stackedAreaVertical = (selection, props) => {
   
   const xAxis = axisBottom(xScale)
     .ticks(12)
-    .tickSize(-width/2)
+    .tickSize(0)
     // .tickPadding(15)
     .tickFormat(d3.timeFormat('%B'));
   
@@ -84,9 +84,9 @@ export const stackedAreaVertical = (selection, props) => {
   xAxisGEnter
     .merge(xAxisG)
       .call(xAxis)
-        .attr('transform', `translate(0,${0}), rotate(0)`)
+        .attr('transform', `translate(0,${-width/2}), rotate(0)`)
       .selectAll('text')
-        .attr('text-anchor', 'middle')
+        .attr('text-anchor', 'end')
         .attr('transform', `rotate(-90)`);
 
   xAxisGEnter.merge(xAxisG).selectAll('.domain').remove()
@@ -137,7 +137,7 @@ export const stackedAreaVertical = (selection, props) => {
   var series = stack(dataToStack);
   // console.log(series)
   const areaGenerator = area()
-    .x(d => xScale(new Date(2018, 0, (d.data.week - 1) * 7)))
+    .x(d => xScale(new Date(year, 0, (d.data.week - 1) * 7)))
     .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
     .y1(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? d[1] - d[0] : d[1]))
     .curve(curveBasis);
@@ -180,144 +180,6 @@ export const stackedAreaVertical = (selection, props) => {
         }
       })
     });
-    // console.log(annotations);
-  //   annotations.map(function(d){ d.color = "#8a2d96"; return d});
-  //   const makeAnnotations = d3.annotation()
-  //     .type(d3.annotationCalloutCurve)
-  //     .annotations(annotations)
-  //     // .editMode(true)
-  //     .notePadding(5)
-
-  //   var annotationG = d3.selectAll(".stacked-area-artist-vertical")//.data([null])
-  //   // annotationG.enter()
-  //     .append("g")
-  //     .attr("class", "annotation-group")
-  //     .call(makeAnnotations)
   });
 
-  // const annotations = [
-  // {
-  //   note: {
-  //     title: "Tiny Moving Parts and Mom Jeans",
-  //     label: "February 10th at the Sinclair"
-  //   },
-  //   x: 230, y: xScale(new Date('10-Feb-2018')), dy: 65, dx: -117, 
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // }, 
-  // {
-  //   note: {
-  //     title: "Sorority Noise",
-  //     label: "April 4th at the Paradise Rock Club"
-  //   },
-  //   x: 160, y: xScale(new Date('4-Apr-2018')), dy: -50, dx: -65,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-25, 0]]
-  //   }
-  // },
-  // {
-  //   note: {
-  //     title: "Lord Huron",
-  //     label: "April 30th at the House of  Blues"
-  //   },
-  //   x: 220, y: xScale(new Date('30-Apr-2018')), dy: -50, dx: -115,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-75, 0]]
-  //   }
-  // },   
-  // {
-  //   note: {
-  //     title: "The Killers, The National, and Julien Baker",
-  //     label: "May 23rd-25th at Boston Calling"
-  //   },
-  //   x: 120, y: xScale(new Date('24-May-2018')), dy: -50, dx: -15,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // },   
-  // // {
-  // //   note: {
-  // //     title: "The National",
-  // //     label: "May 24th at Boston Calling"
-  // //   },
-  // //   x: 210, y: 1200, dy: 0, dx: -150
-  // // },   
-  // // {
-  // //   note: {
-  // //     title: "Julien Baker",
-  // //     label: "May 25th at Boston Calling"
-  // //   },
-  // //   x: 210, y: 1250, dy: 0, dx: -150
-  // // },   
-  // {
-  //   note: {
-  //     title: "Japanese Breakfast",
-  //     label: "June 1st at the Sinclair"
-  //   },
-  //   x: 150, y: xScale(new Date('1-Jun-2018')), dy: 30, dx: -32,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // },   
-  // {
-  //   note: {
-  //     title: "Bon Iver",
-  //     label: "August 5th at the LA Bowl"
-  //   },
-  //   x: 230, y: xScale(new Date('5-Aug-2018')), dy: 70, dx: -125,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // },   
-  // {
-  //   note: {
-  //     title: "Mitski",
-  //     label: "October 20th at the House of Blues"
-  //   },
-  //   x: 210, y: 2150, dy: 0, dx: -150,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // },   
-  // {
-  //   note: {
-  //     title: "Mom Jeans (again)",
-  //     label: "November 1st at the ONCE Ballroom"
-  //   },
-  //   x: 210, y: 2350, dy: 0, dx: -150,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // }, 
-  // {
-  //   note: {
-  //     title: "Pinegrove",
-  //     label: "November 24th at the Sinclair"
-  //   },
-  //   x: 210, y: 2500, dy: 0, dx: -150,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // },
-  // {
-  //   note: {
-  //     title: "Tiny Moving Parts (again)",
-  //     label: "November 25th at the House of Blues"
-  //   },
-  //   x: 210, y: 2750, dy: 0, dx: -150,
-  //   connector: {
-  //     curve: d3.curveLinear,
-  //     points: [[-50, 0]]
-  //   }
-  // }].map(function(d){ d.color = "#8a2d96"; return d})
 };

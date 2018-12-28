@@ -26,11 +26,21 @@ var playColorScale;
 var selectedArtists = []; 
 var deepestGenresByArtist;
 var byWeekPlays;
-var numStackedAreaArtists = 20;
+var numStackedAreaArtists = 30;
 
-var verticalAreaG, artistLegendG;
+const colorValue = d => d.artist;
+const colorScale = scaleOrdinal();
 
-loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
+const verticalAreaSvg = select('.stacked-area-artist-vertical');
+
+const verticalAreaG = verticalAreaSvg.append('g')
+  .attr('transform', `translate(${250}, 0), rotate(90)`);
+
+const artistLegendG = verticalAreaSvg.append('g')
+  .attr('class', 'legend')
+  .attr('transform', `translate(${5},${20})`)
+
+loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2017.csv').then(data => {
   jsonData = data.jsonData;
   artistData = data.artistData;
   byWeekPlaysGenre = data.byWeekPlaysGenre;
@@ -52,19 +62,6 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
 
   playColorScale = scaleSequential(interpolatePlasma)
 		.domain([0, max(Object.values(totalPlaysArtist)) + 100]);
-
-  const verticalAreaSvg = select('.stacked-area-artist-vertical')
-    .attr('height', document.body.clientHeight)
-    .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth)
-    // .attr('transform', `translate(0, 0)`);
-
-  verticalAreaG = verticalAreaSvg.append('g')
-    .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth/2}, 0), rotate(90)`);
-    // .attr('transform', `translate(${500/2}, 0), rotate(90)`);
-
-  artistLegendG = verticalAreaSvg.append('g')
-    .attr('class', 'legend')
-    .attr('transform', `translate(${5},${10})`)
   render();
 })
 
@@ -83,11 +80,11 @@ const render = () => {
     topArtists: topArtists,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
-    width: document.getElementById('stacked-area-artist-vertical').clientWidth,
-    height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
+    width: 500,
+    height: 850,
     numArtists: numStackedAreaArtists,
     onClick: onClickArtist,
-    year: 2018
+    year: 2017
   });
 
   artistLegendG.call(colorLegend, {

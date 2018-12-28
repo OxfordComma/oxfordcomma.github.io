@@ -41,11 +41,7 @@ export const colorLegend = (selection, props) => {
     .merge(groups)
       .transition().duration(200)
       .attr('transform', (d, i) => `translate(0, ${i * spacing})`)
-      .attr('opacity', d =>
-      {
-        // console.log(!selectedLegendItem);
-        return (selectedLegendList.length == 0 || selectedLegendList.includes(d)) ? 1 : 0.2;
-      })
+      .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d)) ? 1 : 0.2)
 
   groups.exit().remove();
   
