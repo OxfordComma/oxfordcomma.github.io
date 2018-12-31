@@ -271,6 +271,13 @@
     const gEnter = g.enter()
       .append('g')
         .attr('class', 'container');
+    
+    // X-axis and scale
+    // This converts from the week scale to a day scale
+    const getDateFromWeek = (weekNumber) => {
+      const numberOfDays = 7*(weekNumber-1)+1;
+      return new Date(year, 0, numberOfDays);
+    };
 
     const xScale = d3$1.scaleTime()
       .domain([
@@ -341,7 +348,7 @@
 
     var series = stack(dataToStack);
     const areaGenerator = d3$1.area()
-      .x(d => xScale(new Date(year, 0, (d.data.week - 1) * 7)))
+      .x(d => xScale(getDateFromWeek(d.data.week)))
       .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
       .y1(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? d[1] - d[0] : d[1]))
       .curve(d3$1.curveBasis);
@@ -365,7 +372,6 @@
         .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
         .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
-    // console.log(document.getElementById('legend'));
     const annotations = [];
     d3$1.csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => 
     {

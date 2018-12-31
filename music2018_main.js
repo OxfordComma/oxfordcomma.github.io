@@ -68,7 +68,6 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   playColorScale = scaleSequential(interpolatePlasma)
 		.domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
 
-  console.log(window.innerHeight)
   const verticalAreaSvg = select('.stacked-area-artist-vertical')
     .attr('height', window.innerHeight)
     .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth)
@@ -110,7 +109,7 @@ const render = () => {
     selectedLegendList: selectedArtists,
     width: document.getElementById('stacked-area-artist-vertical').clientWidth,
     // height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
-    height: window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5,
+    height: window.innerHeight - document.getElementById('navbar-placeholder').clientHeight,
     numArtists: numStackedAreaArtists,
     onClick: onClickArtist,
     year: 2018
