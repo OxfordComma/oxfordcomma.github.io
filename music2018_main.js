@@ -13,6 +13,7 @@ import {
   schemeCategory10,
   interpolateRainbow
 } from 'd3';
+
 import { loadData } from './loadData';
 import { treemap } from './treemap';
 import { stackedAreaHorizontal } from './stackedAreaHorizontal';
