@@ -19,7 +19,7 @@ import { treemap } from './treemap';
 import { stackedAreaVertical } from './stackedAreaVertical';
 import { colorLegend } from './colorLegend';
 
-var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
+var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysByArtist;
 var artistColorScale, genreColorScale;
 var topArtists, topArtistsTrimmed, topGenres;
 var playScale;
@@ -31,7 +31,7 @@ var byWeekPlays;
 var verticalAreaG, artistLegendG, treeG;
 var treeWidth, treeHeight, areaWidth, areaHeight;
 
-const numStackedAreaArtists = 30;
+const numArtists = 40;
 
 loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
   jsonData = data.jsonData;
@@ -41,8 +41,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   topGenres = data.topGenres;
   topArtists = data.topArtists;
   deepestGenresByArtist = data.deepestGenresByArtist;
-  totalPlaysArtist = data.totalPlaysArtist;
-
+  totalPlaysByArtist = data.totalPlaysByArtist;
 
 
   treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
@@ -72,8 +71,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     .attr('class', 'tree')
 
   
-
-  topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
+  topArtistsTrimmed = topArtists.slice(0, numArtists);
   const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
   addArtistsToTree(topArtistsTrimmed, jsonData);
   removeEmptyLeaves(jsonData)
@@ -94,8 +92,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     .range(schemeCategory10);
 
   playScale = scaleSequential(interpolatePlasma)
-    .domain([0, max(Object.values(totalPlaysArtist)) + 100]);
-
+    .domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
 
   render();
 })
@@ -141,7 +138,7 @@ const render = () => {
   treeG.call(treemap, {
     jsonData,
     deepestGenresByArtist,
-    totalPlaysArtist,
+    totalPlaysByArtist,
     topArtists,
     width: treeWidth,
     height: treeHeight,
@@ -157,8 +154,8 @@ const render = () => {
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
     width: areaWidth,
-    height: document.getElementById('tree').clientHeight,
-    numArtists: numStackedAreaArtists,
+    height: areaHeight,
+    numArtists: numArtists,
     onClick: onClickArtist,
     year: 2018
   });
@@ -171,6 +168,6 @@ const render = () => {
   //   backgroundRectWidth: 135,
   //   onClick: onClickArtist,
   //   selectedLegendList: selectedArtists,
-  //   numArtists: numStackedAreaArtists
+  //   numArtists: numArtists
   // });
 }

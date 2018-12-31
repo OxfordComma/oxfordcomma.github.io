@@ -22,6 +22,10 @@ app.get('/navbar.html', function(req, res) {
 	res.sendFile(path.join(__dirname + '/navbar.html'))
 })
 
+app.get('/footer.html', function(req, res) {
+	res.sendFile(path.join(__dirname + '/footer.html'))
+})
+
 app.get('/bundle.js', function(req, res) {
     res.sendFile(path.join(__dirname + '/bundle.js'));
 });
@@ -51,6 +55,7 @@ app.get('/js/bootstrap.min.js', function(req, res) {
 });
 
 app.get('/css/bootstrap.min.css', function(req, res) {
+	console.log('bootstrap')
     res.sendFile(path.join(__dirname + '/css/bootstrap.min.css'));
 });
 

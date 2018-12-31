@@ -13,14 +13,18 @@
       console.log(csvData);
       var sortedGenreList = [];
       var sortedArtistList = [];
-      var totalPlaysArtist = {};
-      var totalPlaysGenre = {};
+      var sortedTrackList = [];
+      var totalPlaysByArtist = {};
+      var totalPlaysByGenre = {};
+      var totalPlaysByTrack = {};
       var deepestGenresByArtist = {};
       
       var topGenres = [];
       var topArtists = [];
+      var topTracks = [];
       var byWeekPlaysGenre = [];
       var byWeekPlaysArtist = [];
+      var byWeekPlaysTrack = [];
       var weekDict = {};
 
       // Bad tags included in the data set. Removed anything country-specific or anything I considered 'not a genre'
@@ -41,7 +45,7 @@
       genreHierarchy.descendants().forEach(d => {
         const name = d.data.id;
         // byWeekPlaysGenre.push(name);
-        totalPlaysGenre[name] = { 
+        totalPlaysByGenre[name] = { 
           depth: d.depth,
           plays: 0,
         };  
@@ -69,27 +73,32 @@
         // console.log(d.weekNum)
         const maxGenre = d.genre[0];
         
-        if (totalPlaysArtist[d.artist] === undefined)
-          totalPlaysArtist[d.artist] = 1;
+        if (totalPlaysByArtist[d.artist] === undefined)
+          totalPlaysByArtist[d.artist] = 1;
         else
-          totalPlaysArtist[d.artist] += 1;
+          totalPlaysByArtist[d.artist] += 1;
+
+        if (totalPlaysByTrack[d.track] === undefined)
+          totalPlaysByTrack[d.track] = {artist: d.artist, track: d.track, plays: 1};
+        else
+          totalPlaysByTrack[d.track].plays += 1;
         
         //Add in the genres not in the tree but  give them negative depth so they are sorted last
         d.genre.forEach(g => {
-          if (totalPlaysGenre[g] === undefined)
-            totalPlaysGenre[g] = { depth: -1, plays: 1};
+          if (totalPlaysByGenre[g] === undefined)
+            totalPlaysByGenre[g] = { depth: -1, plays: 1};
           else
-            totalPlaysGenre[g].plays += 1;
+            totalPlaysByGenre[g].plays += 1;
         });
 
-        d.genre.sort((a, b) => totalPlaysGenre[b].depth - totalPlaysGenre[a].depth); 
+        d.genre.sort((a, b) => totalPlaysByGenre[b].depth - totalPlaysByGenre[a].depth); 
 
 
         if (deepestGenresByArtist[d.artist] === undefined)
           deepestGenresByArtist[d.artist] = d.genre[0];
         
         if (weekDict[d.weekNum] === undefined)
-          weekDict[d.weekNum] = {artists: {}, genres: {}};
+          weekDict[d.weekNum] = {artists: {}, genres: {}, tracks: {}};
         
         if (weekDict[d.weekNum].artists[d.artist] === undefined)
           weekDict[d.weekNum].artists[d.artist] = 1;
@@ -99,22 +108,29 @@
         if (weekDict[d.weekNum].genres[d.genre[0]] === undefined)
           weekDict[d.weekNum].genres[d.genre[0]] = 1;
         else
-          weekDict[d.weekNum].genres[d.genre[0]] += 1; 
+          weekDict[d.weekNum].genres[d.genre[0]] += 1;
+
+        if (weekDict[d.weekNum].tracks[d.track] === undefined)
+          weekDict[d.weekNum].tracks[d.track] = 1;
+        else
+          weekDict[d.weekNum].tracks[d.track] += 1;
       });
       
-      
       // Sort the list of genres according to total play count
-      sortedGenreList = Object.keys(totalPlaysGenre).sort((a, b) => totalPlaysGenre[b].plays - totalPlaysGenre[a].plays);
-      sortedArtistList = Object.keys(totalPlaysArtist).sort((a, b) => totalPlaysArtist[b] - totalPlaysArtist[a]); 
-      
+      sortedGenreList = Object.keys(totalPlaysByGenre).sort((a, b) => totalPlaysByGenre[b].plays - totalPlaysByGenre[a].plays);
+      sortedArtistList = Object.keys(totalPlaysByArtist).sort((a, b) => totalPlaysByArtist[b] - totalPlaysByArtist[a]); 
+      sortedTrackList = Object.keys(totalPlaysByTrack).sort((a, b) => totalPlaysByTrack[b].plays - totalPlaysByTrack[a].plays);
+      console.log(sortedTrackList);
       Object.keys(weekDict).forEach(w => {
         const i = +w - 1;
         
         topArtists = sortedArtistList;//.slice(0, numArtists);
         topGenres = sortedGenreList;//.slice(0, numGenres);
+        topTracks = sortedTrackList;
         
         var genreObj = {week: i + 1};
         var artistObj = {week: i + 1};
+        var trackObj = {week: i + 1};
         
         topArtists.forEach(a => {
           artistObj[a] = weekDict[w].artists[a] ? weekDict[w].artists[a] : 0;
@@ -138,6 +154,12 @@
           genreObj[g] = weekDict[w].genres[g] ? weekDict[w].genres[g] : 0;
         });
         byWeekPlaysGenre.push(genreObj); 
+
+
+        topTracks.forEach(g => {
+          trackObj[g] = weekDict[w].tracks[g] ? weekDict[w].tracks[g] : 0;
+        });
+        byWeekPlaysTrack.push(trackObj); 
       });
       // topArtists.push('everything else');
       // console.log(topGenres)
@@ -149,11 +171,17 @@
       toReturn.jsonData = genreHierarchy.data;
       toReturn.byWeekPlaysGenre = byWeekPlaysGenre.reverse(); 
       toReturn.byWeekPlaysArtist = byWeekPlaysArtist;
-      toReturn.totalPlaysGenre = totalPlaysGenre;
-      toReturn.totalPlaysArtist = totalPlaysArtist;
+      toReturn.byWeekPlaysTrack = byWeekPlaysTrack;
+
+      toReturn.totalPlaysByGenre = totalPlaysByGenre;
+      toReturn.totalPlaysByArtist = totalPlaysByArtist;
+      toReturn.totalPlaysByTrack = totalPlaysByTrack;
+
       toReturn.deepestGenresByArtist = deepestGenresByArtist;
       toReturn.topGenres = topGenres;
       toReturn.topArtists = topArtists;
+      toReturn.topTracks = topTracks;
+
       console.log(toReturn);  
       return toReturn;  
     }).then(r => {return r;}); 
@@ -226,7 +254,8 @@
       .x(d => d.y)
       .y(d => d.x);
 
-    const treeSpread = 130;
+    console.log(width);
+    const treeSpread = width/8;
 
     links.forEach(d => {
       if (d.target.data.artist)
@@ -307,8 +336,10 @@
         new Date(year, 0, 1), 
         new Date(year, 11, 31)])
         // getDateFromWeek(max(Object.keys(dataToStack).map(d => parseInt(d, 10))))])
-      .range([0, height])
-      .nice();
+      .range([0, height]);
+      // .nice()
+
+    console.log(xScale.domain());
     
     const yScale = d3$1.scaleLinear()
       .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
@@ -329,9 +360,9 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-          .attr('transform', `translate(0,${-width/2}), rotate(0)`)
+          .attr('transform', `translate(0,${width/2}), rotate(0)`)
         .selectAll('text')
-          .attr('text-anchor', 'end')
+          .attr('text-anchor', 'start')
           .attr('transform', `rotate(-90)`);
 
     xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
@@ -418,7 +449,7 @@
 
   };
 
-  var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
+  var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysByArtist;
   var artistColorScale, genreColorScale;
   var topArtists, topArtistsTrimmed, topGenres;
   var playScale;
@@ -428,7 +459,7 @@
   var verticalAreaG, artistLegendG, treeG;
   var treeWidth, treeHeight, areaWidth, areaHeight;
 
-  const numStackedAreaArtists = 30;
+  const numArtists = 40;
 
   loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
     jsonData = data.jsonData;
@@ -438,8 +469,7 @@
     topGenres = data.topGenres;
     topArtists = data.topArtists;
     deepestGenresByArtist = data.deepestGenresByArtist;
-    totalPlaysArtist = data.totalPlaysArtist;
-
+    totalPlaysByArtist = data.totalPlaysByArtist;
 
 
     treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
@@ -469,8 +499,7 @@
       .attr('class', 'tree');
 
     
-
-    topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
+    topArtistsTrimmed = topArtists.slice(0, numArtists);
     const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
     addArtistsToTree(topArtistsTrimmed, jsonData);
     removeEmptyLeaves(jsonData);
@@ -491,8 +520,7 @@
       .range(d3$1.schemeCategory10);
 
     playScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
-      .domain([0, d3$1.max(Object.values(totalPlaysArtist)) + 100]);
-
+      .domain([0, d3$1.max(Object.values(totalPlaysByArtist)) + 100]);
 
     render();
   });
@@ -538,7 +566,7 @@
     treeG.call(treemap, {
       jsonData,
       deepestGenresByArtist,
-      totalPlaysArtist,
+      totalPlaysByArtist,
       topArtists,
       width: treeWidth,
       height: treeHeight,
@@ -554,8 +582,8 @@
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
       width: areaWidth,
-      height: document.getElementById('tree').clientHeight,
-      numArtists: numStackedAreaArtists,
+      height: areaHeight,
+      numArtists: numArtists,
       onClick: onClickArtist,
       year: 2018
     });
@@ -568,7 +596,7 @@
     //   backgroundRectWidth: 135,
     //   onClick: onClickArtist,
     //   selectedLegendList: selectedArtists,
-    //   numArtists: numStackedAreaArtists
+    //   numArtists: numArtists
     // });
   };
 

@@ -16,15 +16,17 @@
     <script src='https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js'></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   </head>
-  <body onload=''>
+  <body>
     <nav id='navbar-placeholder'></nav>
-    <div class='row container-fluid'>
-      <div class='col-xs-8 p-0' id='tree'>
-        <svg class='tree'></svg>
+    <div class='container-fluid'>
+      <div class='row'>
+        <div class='col-md-8 p-0' id='tree'>
+          <svg class='tree'></svg>
+        </div>
+        <div class='col-md-4 p-0' id='stacked-area-artist-vertical'>
+          <svg class='stacked-area-artist-vertical'></svg>
+        </div>
       </div>
-      <div class='col-xs-4 p-0' id='stacked-area-artist-vertical'>
-        <svg class='stacked-area-artist-vertical'></svg>
-      </div class='row'>
     </div>
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
     <script>

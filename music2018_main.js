@@ -19,14 +19,19 @@ import { stackedAreaHorizontal } from './stackedAreaHorizontal';
 import { stackedAreaVertical } from './stackedAreaVertical';
 import { colorLegend } from './colorLegend';
 
-var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysArtist;
-var artistColorScale, genreColorScale;
-var topArtists, topGenres;
+var jsonData, artistData
+var byWeekPlaysGenre, totalPlaysByGenre;
+var byWeekPlaysArtist, totalPlaysByArtist;
+var byWeekPlaysTrack, totalPlaysByTrack;
+var artistColorScale, genreColorScale, trackColorScale;
+var topArtists, topGenres, topTracks;
 var playColorScale;
 var selectedArtists = []; 
+var selectedTracks = [];
 var deepestGenresByArtist;
 var byWeekPlays;
-var numStackedAreaArtists = 20;
+var numStackedAreaArtists = 25;
+var numStackedTracks = 30;
 
 var verticalAreaG, artistLegendG;
 
@@ -35,10 +40,14 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   artistData = data.artistData;
   byWeekPlaysGenre = data.byWeekPlaysGenre;
   byWeekPlaysArtist = data.byWeekPlaysArtist;
+  byWeekPlaysTrack = data.byWeekPlaysTrack;
+
   topGenres = data.topGenres;
   topArtists = data.topArtists;
+  topTracks = data.topTracks;
+
   deepestGenresByArtist = data.deepestGenresByArtist;
-  totalPlaysArtist = data.totalPlaysArtist;
+  totalPlaysByArtist = data.totalPlaysByArtist;
 
   artistColorScale = scaleOrdinal()
     .domain(topArtists.slice(0, numStackedAreaArtists));
@@ -50,11 +59,18 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     .domain(topGenres)
     .range(schemeCategory10);
 
-  playColorScale = scaleSequential(interpolatePlasma)
-		.domain([0, max(Object.values(totalPlaysArtist)) + 100]);
+  trackColorScale = scaleOrdinal()
+    .domain(topTracks.slice(0, numStackedTracks));
+  const m = trackColorScale.domain().length;
+  trackColorScale
+    .range(trackColorScale.domain().map((d, i) => interpolateRainbow(i/(m+1))));
 
+  playColorScale = scaleSequential(interpolatePlasma)
+		.domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
+
+  console.log(window.innerHeight)
   const verticalAreaSvg = select('.stacked-area-artist-vertical')
-    .attr('height', document.body.clientHeight)
+    .attr('height', window.innerHeight)
     .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth)
     // .attr('transform', `translate(0, 0)`);
 
@@ -63,8 +79,8 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     // .attr('transform', `translate(${500/2}, 0), rotate(90)`);
 
   artistLegendG = verticalAreaSvg.append('g')
-    .attr('class', 'legend-container')
-    .attr('transform', `translate(${5},${10})`)
+    .attr('class', 'legend-container d-none d-md-block')
+    .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth - 160},${10})`)
   render();
 })
 
@@ -77,6 +93,15 @@ const onClickArtist = d => {
   render(); 
 };
 
+const onClickTrack = d => {
+  if (!selectedTracks.includes(d))
+    selectedTracks.push(d);
+  else
+  selectedTracks = selectedTracks.filter(val => val != d);
+  console.log(selectedTracks)
+  render(); 
+};
+
 const render = () => {
   verticalAreaG.call(stackedAreaVertical, {
     dataToStack: byWeekPlaysArtist,
@@ -84,11 +109,24 @@ const render = () => {
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
     width: document.getElementById('stacked-area-artist-vertical').clientWidth,
-    height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
+    // height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
+    height: window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5,
     numArtists: numStackedAreaArtists,
     onClick: onClickArtist,
     year: 2018
   });
+
+  // verticalAreaG.call(stackedAreaVertical, {
+  //   dataToStack: byWeekPlaysTrack,
+  //   topArtists: topTracks,
+  //   colorScale: trackColorScale,
+  //   selectedLegendList: selectedTracks,
+  //   width: document.getElementById('stacked-area-artist-vertical').clientWidth,
+  //   height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
+  //   numArtists: numStackedTracks,
+  //   onClick: onClickTrack,
+  //   year: 2018
+  // });
 
   artistLegendG.call(colorLegend, {
     colorScale: artistColorScale,

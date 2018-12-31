@@ -64,7 +64,9 @@ export const stackedAreaVertical = (selection, props) => {
       new Date(year, 11, 31)])
       // getDateFromWeek(max(Object.keys(dataToStack).map(d => parseInt(d, 10))))])
     .range([0, height])
-    .nice()
+    // .nice()
+
+  console.log(xScale.domain())
   
   const yScale = scaleLinear()
     .domain([0, max(dataToStack.map(d => sum(Object.values(d))))])
@@ -85,9 +87,9 @@ export const stackedAreaVertical = (selection, props) => {
   xAxisGEnter
     .merge(xAxisG)
       .call(xAxis)
-        .attr('transform', `translate(0,${-width/2}), rotate(0)`)
+        .attr('transform', `translate(0,${width/2}), rotate(0)`)
       .selectAll('text')
-        .attr('text-anchor', 'end')
+        .attr('text-anchor', 'start')
         .attr('transform', `rotate(-90)`);
 
   xAxisGEnter.merge(xAxisG).selectAll('.domain').remove()

@@ -73,7 +73,8 @@ export const treemap = (selection, props) => {
     .x(d => d.y)
     .y(d => d.x);
 
-  const treeSpread = 130;
+  console.log(width)
+  const treeSpread = width/8;
 
   links.forEach(d => {
     if (d.target.data.artist)

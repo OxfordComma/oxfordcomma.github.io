@@ -53,4 +53,4 @@ for index, t in enumerate(total_tracks):
     }
     print(index)
 
-to_csv.to_csv('/Users/nick/Desktop/music data/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=True, index=False)
+to_csv.to_csv('/Users/nick/oxfordcomma.github.io/{0}.csv'.format(datetime.datetime.now().strftime('%d%b%Y_%H%M%S')), header=True, index=False)
