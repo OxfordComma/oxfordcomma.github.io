@@ -1,4 +1,4 @@
-import { csv, hierarchy, json, nest } from 'd3';
+import { csv, hierarchy, json } from 'd3';
 // import LastFM from 'last-fm';
 
 export const loadData = url => {

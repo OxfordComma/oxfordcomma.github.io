@@ -2,8 +2,7 @@ import {
   hierarchy, 
   cluster, 
   select,
-	linkHorizontal,
-  linkVertical,
+	linkHorizontal
 } from 'd3';
 
 export const treemap = (selection, props) => {

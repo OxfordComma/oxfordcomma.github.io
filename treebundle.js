@@ -339,6 +339,23 @@
     const hEnter = h.enter()
       .append('g')
         .attr('class', 'axes');
+
+    const artistText = selection.selectAll('.artist-text').data(selectedLegendList);
+    const artistTextEnter = artistText.enter().append('g')
+        .attr('class', 'artist-text d-block d-md-none')
+        .attr('transform', 'translate(-50, 40) rotate(90)');
+    
+    artistTextEnter.merge(artistText)
+      .append('text')
+        .transition()
+          .duration(500)
+        .attr('x', '0')
+        .attr('y', '0')
+        .attr('fill', d => colorScale(d))
+        .text(d => d);
+
+    artistText.exit()
+      .remove();
     
     // X-axis and scale
     // This converts from the week scale to a day scale
@@ -437,7 +454,6 @@
       .transition()
         .duration(200)
           .attr('opacity', d => {
-            console.log((selectedLegendList.length == 0 || selectedLegendList.includes(d.key)));
             return (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0})
           .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 

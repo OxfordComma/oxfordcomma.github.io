@@ -279,6 +279,23 @@
     const hEnter = h.enter()
       .append('g')
         .attr('class', 'axes');
+
+    const artistText = selection.selectAll('.artist-text').data(selectedLegendList);
+    const artistTextEnter = artistText.enter().append('g')
+        .attr('class', 'artist-text d-block d-md-none')
+        .attr('transform', 'translate(-50, 40) rotate(90)');
+    
+    artistTextEnter.merge(artistText)
+      .append('text')
+        .transition()
+          .duration(500)
+        .attr('x', '0')
+        .attr('y', '0')
+        .attr('fill', d => colorScale(d))
+        .text(d => d);
+
+    artistText.exit()
+      .remove();
     
     // X-axis and scale
     // This converts from the week scale to a day scale
@@ -377,7 +394,6 @@
       .transition()
         .duration(200)
           .attr('opacity', d => {
-            console.log((selectedLegendList.length == 0 || selectedLegendList.includes(d.key)));
             return (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0})
           .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
@@ -409,14 +425,13 @@
   var byWeekPlaysTrack;
   var artistColorScale, genreColorScale, trackColorScale;
   var topArtists, topGenres, topTracks;
-  // var playColorScale;
   var selectedArtists = []; 
   var deepestGenresByArtist;
   var numStackedAreaArtists = 25;
   var numStackedTracks = 30;
+  var legendWidth = 160;
 
   var verticalAreaG, artistLegendG;
-
   var areaWidth, areaHeight;
 
   loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
@@ -430,40 +445,42 @@
     topArtists = data.topArtists;
     topTracks = data.topTracks;
 
+    var topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
+    var topTracksTrimmed = topTracks.slice(0, numStackedTracks);
+
     deepestGenresByArtist = data.deepestGenresByArtist;
     totalPlaysByArtist = data.totalPlaysByArtist;
 
     artistColorScale = d3$1.scaleOrdinal()
-      .domain(topArtists.slice(0, numStackedAreaArtists));
+      .domain(topArtistsTrimmed);
     const n = artistColorScale.domain().length;
     artistColorScale
       .range(artistColorScale.domain().map((d, i) => d3$1.interpolateRainbow(i/(n+1))));
+
+    trackColorScale = d3$1.scaleOrdinal()
+      .domain(topTracksTrimmed);
+    const m = trackColorScale.domain().length;
+    trackColorScale
+      .range(trackColorScale.domain().map((d, i) => d3$1.interpolateRainbow(i/(m+1))));
 
    	genreColorScale = d3$1.scaleOrdinal()
       .domain(topGenres)
       .range(d3$1.schemeCategory10);
 
-    trackColorScale = d3$1.scaleOrdinal()
-      .domain(topTracks.slice(0, numStackedTracks));
-    const m = trackColorScale.domain().length;
-    trackColorScale
-      .range(trackColorScale.domain().map((d, i) => d3$1.interpolateRainbow(i/(m+1))));
-
-    // playColorScale = scaleSequential(interpolatePlasma)
-  		// .domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
-
     const verticalAreaSvg = d3$1.select('.stacked-area-artist-svg')
       .attr('height', window.innerHeight)
-      .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth);
+      .attr('width', document.getElementById('stacked-area-artist').clientWidth);
 
-    verticalAreaG = verticalAreaSvg.append('g')
-      .attr('class', 'stacked-area-container');
+    verticalAreaG = verticalAreaSvg
+      .append('g')
+        .attr('class', 'stacked-area-container');
 
-    artistLegendG = verticalAreaSvg.append('g')
-      .attr('class', 'legend-container d-none d-md-block')
-      .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth - 160},${10})`);
+    artistLegendG = verticalAreaSvg
+      .append('g')
+        .attr('class', 'legend-container d-none d-md-block')
+        .attr('transform', `translate(${document.getElementById('stacked-area-artist').clientWidth - legendWidth},${10})`);
 
-    areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+    areaWidth = document.getElementById('stacked-area-artist').clientWidth;
     areaHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight;  
     render();
   });
@@ -472,7 +489,18 @@
     if (!selectedArtists.includes(d))
       selectedArtists.push(d);
     else
-    selectedArtists = selectedArtists.filter(val => val != d);
+      selectedArtists = selectedArtists.filter(val => val != d);
+    
+    console.log(selectedArtists);
+    render(); 
+  };
+
+  const onClickArtistUnique = d => {
+    if (selectedArtists.length == 0)
+      selectedArtists = [d];
+    else
+      selectedArtists = [];
+    
     console.log(selectedArtists);
     render(); 
   };
@@ -486,30 +514,18 @@
       width: areaWidth,
       height: areaHeight,
       numArtists: numStackedAreaArtists,
-      onClick: onClickArtist,
+      onClick: onClickArtistUnique,
       year: 2018,
       amplitude: -1,
       position: 100
     });
-
-    // verticalAreaG.call(stackedAreaVertical, {
-    //   dataToStack: byWeekPlaysTrack,
-    //   topArtists: topTracks,
-    //   colorScale: trackColorScale,
-    //   selectedLegendList: selectedTracks,
-    //   width: document.getElementById('stacked-area-artist-vertical').clientWidth,
-    //   height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
-    //   numArtists: numStackedTracks,
-    //   onClick: onClickTrack,
-    //   year: 2018
-    // });
 
     artistLegendG.call(colorLegend, {
       colorScale: artistColorScale,
       circleRadius: 5,
       spacing: 17,
       textOffset: 12,
-      backgroundRectWidth: 135,
+      backgroundRectWidth: legendWidth,
       onClick: onClickArtist,
       selectedLegendList: selectedArtists
     });

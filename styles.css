@@ -46,6 +46,11 @@ h1 {
   cursor: pointer;
 }
 
+.artist-text {
+  font-size: 1.8em;
+  word-wrap: break-word;
+}
+
 .line-path {
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -53,9 +58,9 @@ h1 {
   cursor: pointer;
 }
 
-.line-path:hover {
+/*.line-path:hover {
   fill: lightblue;
-}
+}*/
 
 /*.artist {
   cursor: pointer;
