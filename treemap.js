@@ -28,7 +28,7 @@ export const treemap = (selection, props) => {
   var maxGenreDepth = 0;
   
   const treeLayout = cluster()
-    .size([height, width])
+    .size([height, 0.75*width])
     .separation((a, b) => { 
       return (a.parent == b.parent ? 1 : 1); 
     })
@@ -73,15 +73,16 @@ export const treemap = (selection, props) => {
     .x(d => d.y)
     .y(d => d.x);
 
-  console.log(width)
-  const treeSpread = width/8;
+  const treeSpread = d3.max([width/7, 95]);
+  selection.width = treeSpread * maxGenreDepth
 
-  links.forEach(d => {
-    if (d.target.data.artist)
-      d.target.y = (maxGenreDepth + 1) * treeSpread;
-    else
-  		d.target.y = (d.target.depth + 1) * treeSpread;
-  }); 
+  // links.forEach(d => {
+  //   if (d.target.data.artist)
+  //     d.target.y = (maxGenreDepth) * treeSpread;
+  //   else
+  // 		d.target.y = (d.target.depth) * treeSpread;
+  // }); 
+
 
   selection.selectAll('path').data(links)
     .enter().append('path')

@@ -44,13 +44,14 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   totalPlaysByArtist = data.totalPlaysByArtist;
 
 
+  // treeWidth = document.getElementById('tree').clientWidth;
+  treeWidth = document.getElementById('tree').clientWidth < 500 ? 1000 : document.getElementById('tree').clientWidth
   treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
-  treeWidth = document.getElementById('tree').clientWidth;
 
-  areaHeight = treeHeight;  
   areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+  areaHeight = treeHeight;  
 
-  const verticalAreaSvg = select('.stacked-area-artist-vertical')
+  const verticalAreaSvg = select('.stacked-area-artist-svg')
     .attr('height', areaHeight)
     .attr('width', areaWidth)
 
@@ -61,7 +62,8 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   // console.log(treeHeight)
 
   verticalAreaG = verticalAreaSvg.append('g')
-    .attr('transform', `translate(${areaWidth/2}, 0), rotate(90)`);
+    // .attr('class', 'd-none d-md-block')
+    .attr('transform', `translate(${0}, 0), rotate(90)`);
 
   artistLegendG = verticalAreaSvg.append('g')
     .attr('class', 'legend')
@@ -157,7 +159,9 @@ const render = () => {
     height: areaHeight,
     numArtists: numArtists,
     onClick: onClickArtist,
-    year: 2018
+    year: 2018,
+    amplitude: 1,
+    position: 0
   });
 
   // artistLegendG.call(colorLegend, {

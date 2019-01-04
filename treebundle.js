@@ -209,7 +209,7 @@
     var maxGenreDepth = 0;
     
     const treeLayout = d3$1.cluster()
-      .size([height, width])
+      .size([height, 0.75*width])
       .separation((a, b) => { 
         return (a.parent == b.parent ? 1 : 1); 
       });
@@ -254,15 +254,16 @@
       .x(d => d.y)
       .y(d => d.x);
 
-    console.log(width);
-    const treeSpread = width/8;
+    const treeSpread = d3.max([width/7, 95]);
+    selection.width = treeSpread * maxGenreDepth;
 
-    links.forEach(d => {
-      if (d.target.data.artist)
-        d.target.y = (maxGenreDepth + 1) * treeSpread;
-      else
-    		d.target.y = (d.target.depth + 1) * treeSpread;
-    }); 
+    // links.forEach(d => {
+    //   if (d.target.data.artist)
+    //     d.target.y = (maxGenreDepth) * treeSpread;
+    //   else
+    // 		d.target.y = (d.target.depth) * treeSpread;
+    // }); 
+
 
     selection.selectAll('path').data(links)
       .enter().append('path')
@@ -319,17 +320,25 @@
       height,
       numArtists,
       onClick,
-      year
+      year,
+      amplitude,
+      position
     } = props;
 
     const topArtistsTrimmed = topArtists.slice(0, numArtists);
-    const margin = {left: 0, right: 0};
-    const innerWidth = width - margin.left - margin.right;
+    
+    selection 
+      .attr('transform', `rotate(-90)`);
 
     const g = selection.selectAll('.container').data([null]);
     const gEnter = g.enter()
       .append('g')
         .attr('class', 'container');
+
+    const h = selection.selectAll('.axes').data([null]);
+    const hEnter = h.enter()
+      .append('g')
+        .attr('class', 'axes');
     
     // X-axis and scale
     // This converts from the week scale to a day scale
@@ -343,14 +352,12 @@
         new Date(year, 0, 1), 
         new Date(year, 11, 31)])
         // getDateFromWeek(max(Object.keys(dataToStack).map(d => parseInt(d, 10))))])
-      .range([0, height]);
+      .range([0, -height]);
       // .nice()
 
-    console.log(xScale.domain());
-    
     const yScale = d3$1.scaleLinear()
       .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
-      .range([0, innerWidth])
+      .range([0, width * amplitude])
       .nice(); 
     
     const xAxis = d3$1.axisBottom(xScale)
@@ -367,10 +374,9 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-          .attr('transform', `translate(0,${width/2}), rotate(0)`)
         .selectAll('text')
           .attr('text-anchor', 'start')
-          .attr('transform', `rotate(-90)`);
+          .attr('transform', `rotate(90)`);
 
     xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
     
@@ -403,6 +409,7 @@
     
     var stack = d3.stack(dataToStack)
       .keys(topArtistsTrimmed)
+      // .offset(d3.stackOffsetSilhouette)
       .offset(d3.stackOffsetWiggle);
 
     var series = stack(dataToStack);
@@ -413,11 +420,12 @@
       .curve(d3$1.curveBasis);
     
     const lines = selection.selectAll('.line-path').data(series);
+
     const linesEnter = lines.enter()
       .append('path')
         .attr('class', 'line-path') 
-        .attr('fill', d => colorScale(d.key));
-        // .attr('stroke', 'black')
+        .attr('fill', d => colorScale(d.key))
+        .attr('transform', `translate(0, ${(width)/2 + position})`);
 
     lines.merge(linesEnter)
       .on('click', d => onClick(d.key))
@@ -428,12 +436,13 @@
     lines.merge(linesEnter)
       .transition()
         .duration(200)
-        .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
-        .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
+          .attr('opacity', d => {
+            console.log((selectedLegendList.length == 0 || selectedLegendList.includes(d.key)));
+            return (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0})
+          .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
     const annotations = [];
-    d3$1.csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => 
-    {
+    d3$1.csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => {
       annotationData.forEach(a => {
         a.date = new Date(a.date);
         annotations.push({
@@ -452,7 +461,6 @@
         });
       });
     });
-
   };
 
   var jsonData, artistData, byWeekPlaysGenre, byWeekPlaysArtist, totalPlaysByArtist;
@@ -478,13 +486,14 @@
     totalPlaysByArtist = data.totalPlaysByArtist;
 
 
+    // treeWidth = document.getElementById('tree').clientWidth;
+    treeWidth = document.getElementById('tree').clientWidth < 500 ? 1000 : document.getElementById('tree').clientWidth;
     treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
-    treeWidth = document.getElementById('tree').clientWidth;
 
-    areaHeight = treeHeight;  
     areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+    areaHeight = treeHeight;  
 
-    const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical')
+    const verticalAreaSvg = d3$1.select('.stacked-area-artist-svg')
       .attr('height', areaHeight)
       .attr('width', areaWidth);
 
@@ -495,7 +504,8 @@
     // console.log(treeHeight)
 
     verticalAreaG = verticalAreaSvg.append('g')
-      .attr('transform', `translate(${areaWidth/2}, 0), rotate(90)`);
+      // .attr('class', 'd-none d-md-block')
+      .attr('transform', `translate(${0}, 0), rotate(90)`);
 
     artistLegendG = verticalAreaSvg.append('g')
       .attr('class', 'legend')
@@ -591,7 +601,9 @@
       height: areaHeight,
       numArtists: numArtists,
       onClick: onClickArtist,
-      year: 2018
+      year: 2018,
+      amplitude: 1,
+      position: 0
     });
 
     // artistLegendG.call(colorLegend, {

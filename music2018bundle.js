@@ -260,17 +260,25 @@
       height,
       numArtists,
       onClick,
-      year
+      year,
+      amplitude,
+      position
     } = props;
 
     const topArtistsTrimmed = topArtists.slice(0, numArtists);
-    const margin = {left: 0, right: 0};
-    const innerWidth = width - margin.left - margin.right;
+    
+    selection 
+      .attr('transform', `rotate(-90)`);
 
     const g = selection.selectAll('.container').data([null]);
     const gEnter = g.enter()
       .append('g')
         .attr('class', 'container');
+
+    const h = selection.selectAll('.axes').data([null]);
+    const hEnter = h.enter()
+      .append('g')
+        .attr('class', 'axes');
     
     // X-axis and scale
     // This converts from the week scale to a day scale
@@ -284,14 +292,12 @@
         new Date(year, 0, 1), 
         new Date(year, 11, 31)])
         // getDateFromWeek(max(Object.keys(dataToStack).map(d => parseInt(d, 10))))])
-      .range([0, height]);
+      .range([0, -height]);
       // .nice()
 
-    console.log(xScale.domain());
-    
     const yScale = d3$1.scaleLinear()
       .domain([0, d3$1.max(dataToStack.map(d => d3$1.sum(Object.values(d))))])
-      .range([0, innerWidth])
+      .range([0, width * amplitude])
       .nice(); 
     
     const xAxis = d3$1.axisBottom(xScale)
@@ -308,10 +314,9 @@
     xAxisGEnter
       .merge(xAxisG)
         .call(xAxis)
-          .attr('transform', `translate(0,${width/2}), rotate(0)`)
         .selectAll('text')
           .attr('text-anchor', 'start')
-          .attr('transform', `rotate(-90)`);
+          .attr('transform', `rotate(90)`);
 
     xAxisGEnter.merge(xAxisG).selectAll('.domain').remove();
     
@@ -344,6 +349,7 @@
     
     var stack = d3.stack(dataToStack)
       .keys(topArtistsTrimmed)
+      // .offset(d3.stackOffsetSilhouette)
       .offset(d3.stackOffsetWiggle);
 
     var series = stack(dataToStack);
@@ -354,11 +360,12 @@
       .curve(d3$1.curveBasis);
     
     const lines = selection.selectAll('.line-path').data(series);
+
     const linesEnter = lines.enter()
       .append('path')
         .attr('class', 'line-path') 
-        .attr('fill', d => colorScale(d.key));
-        // .attr('stroke', 'black')
+        .attr('fill', d => colorScale(d.key))
+        .attr('transform', `translate(0, ${(width)/2 + position})`);
 
     lines.merge(linesEnter)
       .on('click', d => onClick(d.key))
@@ -369,12 +376,13 @@
     lines.merge(linesEnter)
       .transition()
         .duration(200)
-        .attr('opacity', d => (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0)
-        .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
+          .attr('opacity', d => {
+            console.log((selectedLegendList.length == 0 || selectedLegendList.includes(d.key)));
+            return (selectedLegendList.length == 0 || selectedLegendList.includes(d.key)) ? 1 : 0})
+          .attr('stroke-width', d => (selectedLegendList.length != 0 || selectedLegendList.includes(d.key)) ? 0.05 : 0);
 
     const annotations = [];
-    d3$1.csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => 
-    {
+    d3$1.csv('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/concert_dates.csv').then(annotationData => {
       annotationData.forEach(a => {
         a.date = new Date(a.date);
         annotations.push({
@@ -393,7 +401,6 @@
         });
       });
     });
-
   };
 
   var jsonData, artistData;
@@ -402,13 +409,15 @@
   var byWeekPlaysTrack;
   var artistColorScale, genreColorScale, trackColorScale;
   var topArtists, topGenres, topTracks;
-  var playColorScale;
+  // var playColorScale;
   var selectedArtists = []; 
   var deepestGenresByArtist;
   var numStackedAreaArtists = 25;
   var numStackedTracks = 30;
 
   var verticalAreaG, artistLegendG;
+
+  var areaWidth, areaHeight;
 
   loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
     jsonData = data.jsonData;
@@ -440,21 +449,22 @@
     trackColorScale
       .range(trackColorScale.domain().map((d, i) => d3$1.interpolateRainbow(i/(m+1))));
 
-    playColorScale = d3$1.scaleSequential(d3$1.interpolatePlasma)
-  		.domain([0, d3$1.max(Object.values(totalPlaysByArtist)) + 100]);
+    // playColorScale = scaleSequential(interpolatePlasma)
+  		// .domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
 
-    const verticalAreaSvg = d3$1.select('.stacked-area-artist-vertical')
+    const verticalAreaSvg = d3$1.select('.stacked-area-artist-svg')
       .attr('height', window.innerHeight)
       .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth);
-      // .attr('transform', `translate(0, 0)`);
 
     verticalAreaG = verticalAreaSvg.append('g')
-      .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth/2}, 0), rotate(90)`);
-      // .attr('transform', `translate(${500/2}, 0), rotate(90)`);
+      .attr('class', 'stacked-area-container');
 
     artistLegendG = verticalAreaSvg.append('g')
       .attr('class', 'legend-container d-none d-md-block')
       .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth - 160},${10})`);
+
+    areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+    areaHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight;  
     render();
   });
 
@@ -473,12 +483,13 @@
       topArtists: topArtists,
       colorScale: artistColorScale,
       selectedLegendList: selectedArtists,
-      width: document.getElementById('stacked-area-artist-vertical').clientWidth,
-      // height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
-      height: window.innerHeight - document.getElementById('navbar-placeholder').clientHeight,
+      width: areaWidth,
+      height: areaHeight,
       numArtists: numStackedAreaArtists,
       onClick: onClickArtist,
-      year: 2018
+      year: 2018,
+      amplitude: -1,
+      position: 100
     });
 
     // verticalAreaG.call(stackedAreaVertical, {
@@ -496,7 +507,7 @@
     artistLegendG.call(colorLegend, {
       colorScale: artistColorScale,
       circleRadius: 5,
-      spacing: 15,
+      spacing: 17,
       textOffset: 12,
       backgroundRectWidth: 135,
       onClick: onClickArtist,

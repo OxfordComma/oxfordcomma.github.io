@@ -20,13 +20,13 @@ import { stackedAreaHorizontal } from './stackedAreaHorizontal';
 import { stackedAreaVertical } from './stackedAreaVertical';
 import { colorLegend } from './colorLegend';
 
-var jsonData, artistData
+var jsonData, artistData;
 var byWeekPlaysGenre, totalPlaysByGenre;
 var byWeekPlaysArtist, totalPlaysByArtist;
 var byWeekPlaysTrack, totalPlaysByTrack;
 var artistColorScale, genreColorScale, trackColorScale;
 var topArtists, topGenres, topTracks;
-var playColorScale;
+// var playColorScale;
 var selectedArtists = []; 
 var selectedTracks = [];
 var deepestGenresByArtist;
@@ -35,6 +35,8 @@ var numStackedAreaArtists = 25;
 var numStackedTracks = 30;
 
 var verticalAreaG, artistLegendG;
+
+var areaWidth, areaHeight;
 
 loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv').then(data => {
   jsonData = data.jsonData;
@@ -66,21 +68,22 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   trackColorScale
     .range(trackColorScale.domain().map((d, i) => interpolateRainbow(i/(m+1))));
 
-  playColorScale = scaleSequential(interpolatePlasma)
-		.domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
+  // playColorScale = scaleSequential(interpolatePlasma)
+		// .domain([0, max(Object.values(totalPlaysByArtist)) + 100]);
 
-  const verticalAreaSvg = select('.stacked-area-artist-vertical')
+  const verticalAreaSvg = select('.stacked-area-artist-svg')
     .attr('height', window.innerHeight)
     .attr('width', document.getElementById('stacked-area-artist-vertical').clientWidth)
-    // .attr('transform', `translate(0, 0)`);
 
   verticalAreaG = verticalAreaSvg.append('g')
-    .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth/2}, 0), rotate(90)`);
-    // .attr('transform', `translate(${500/2}, 0), rotate(90)`);
+    .attr('class', 'stacked-area-container')
 
   artistLegendG = verticalAreaSvg.append('g')
     .attr('class', 'legend-container d-none d-md-block')
-    .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth - 160},${10})`)
+    .attr('transform', `translate(${document.getElementById('stacked-area-artist-vertical').clientWidth - 160},${10})`);
+
+  areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
+  areaHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight;  
   render();
 })
 
@@ -108,12 +111,13 @@ const render = () => {
     topArtists: topArtists,
     colorScale: artistColorScale,
     selectedLegendList: selectedArtists,
-    width: document.getElementById('stacked-area-artist-vertical').clientWidth,
-    // height: document.body.clientHeight - document.getElementById('navbar-placeholder').clientHeight,
-    height: window.innerHeight - document.getElementById('navbar-placeholder').clientHeight,
+    width: areaWidth,
+    height: areaHeight,
     numArtists: numStackedAreaArtists,
     onClick: onClickArtist,
-    year: 2018
+    year: 2018,
+    amplitude: -1,
+    position: 100
   });
 
   // verticalAreaG.call(stackedAreaVertical, {
@@ -131,7 +135,7 @@ const render = () => {
   artistLegendG.call(colorLegend, {
     colorScale: artistColorScale,
     circleRadius: 5,
-    spacing: 15,
+    spacing: 17,
     textOffset: 12,
     backgroundRectWidth: 135,
     onClick: onClickArtist,
