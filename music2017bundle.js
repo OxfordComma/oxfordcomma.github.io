@@ -267,7 +267,7 @@
 
     const topArtistsTrimmed = topArtists.slice(0, numArtists);
     
-    selection 
+    selection
       .attr('transform', `rotate(-90)`);
 
     const g = selection.selectAll('.container').data([null]);
@@ -283,7 +283,7 @@
     const artistText = selection.selectAll('.artist-text').data(selectedLegendList);
     const artistTextEnter = artistText.enter().append('g')
         .attr('class', 'artist-text d-block d-md-none')
-        .attr('transform', 'translate(-50, 40) rotate(90)');
+        .attr('transform', 'translate(-20, 95) rotate(90)');
     
     artistTextEnter.merge(artistText)
       .append('text')
@@ -369,7 +369,12 @@
       // .offset(d3.stackOffsetSilhouette)
       .offset(d3.stackOffsetWiggle);
 
+
     var series = stack(dataToStack);
+    
+    console.log(series);
+    console.log(series[0].map(d => d[0]));
+
     const areaGenerator = d3$1.area()
       .x(d => xScale(getDateFromWeek(d.data.week)))
       .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))

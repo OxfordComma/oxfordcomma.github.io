@@ -46,24 +46,32 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
 
   // treeWidth = document.getElementById('tree').clientWidth;
   treeWidth = document.getElementById('tree').clientWidth < 500 ? 1000 : document.getElementById('tree').clientWidth
-  treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
+  treeHeight = 1000//window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
 
   areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
   areaHeight = treeHeight;  
 
   const verticalAreaSvg = select('.stacked-area-artist-svg')
-    .attr('height', areaHeight)
-    .attr('width', areaWidth)
+      .attr('height', areaHeight)
+      .attr('width', areaWidth)
+
+  // verticalAreaSvg.append('rect')
+  //     .attr('width', '100%')
+  //     .attr('height', '100%')
+  //     .attr('fill', 'black')
 
   const treeSvg = select('.tree')
     .attr('height', treeHeight)
     .attr('width', treeWidth)
 
-  // console.log(treeHeight)
+  // treeSvg.append('rect')
+  //     .attr('width', '100%')
+  //     .attr('height', '100%')
+  //     .attr('fill', 'black')
 
   verticalAreaG = verticalAreaSvg.append('g')
     // .attr('class', 'd-none d-md-block')
-    .attr('transform', `translate(${0}, 0), rotate(90)`);
+    .attr('transform', `translate(${0}, ${0}), rotate(90)`);
 
   artistLegendG = verticalAreaSvg.append('g')
     .attr('class', 'legend')
@@ -72,7 +80,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   treeG = treeSvg.append('g')
     .attr('class', 'tree')
 
-  
+
   topArtistsTrimmed = topArtists.slice(0, numArtists);
   const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a])
   addArtistsToTree(topArtistsTrimmed, jsonData);

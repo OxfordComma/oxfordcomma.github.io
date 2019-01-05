@@ -47,6 +47,9 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
   var topArtistsTrimmed = topArtists.slice(0, numStackedAreaArtists);
   var topTracksTrimmed = topTracks.slice(0, numStackedTracks);
 
+  areaWidth = document.getElementById('stacked-area-artist').clientWidth;
+  areaHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight;  
+
   deepestGenresByArtist = data.deepestGenresByArtist;
   totalPlaysByArtist = data.totalPlaysByArtist;
 
@@ -67,7 +70,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     .range(schemeCategory10);
 
   const verticalAreaSvg = select('.stacked-area-artist-svg')
-    .attr('height', window.innerHeight)
+    .attr('height', areaHeight)
     .attr('width', document.getElementById('stacked-area-artist').clientWidth)
 
   verticalAreaG = verticalAreaSvg
@@ -78,9 +81,7 @@ loadData('https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/ma
     .append('g')
       .attr('class', 'legend-container d-none d-md-block')
       .attr('transform', `translate(${document.getElementById('stacked-area-artist').clientWidth - legendWidth},${10})`);
-
-  areaWidth = document.getElementById('stacked-area-artist').clientWidth;
-  areaHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight;  
+  
   render();
 })
 

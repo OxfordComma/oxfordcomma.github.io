@@ -55,7 +55,6 @@ app.get('/js/bootstrap.min.js', function(req, res) {
 });
 
 app.get('/css/bootstrap.min.css', function(req, res) {
-	console.log('bootstrap')
     res.sendFile(path.join(__dirname + '/css/bootstrap.min.css'));
 });
 

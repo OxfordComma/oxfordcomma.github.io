@@ -327,7 +327,7 @@
 
     const topArtistsTrimmed = topArtists.slice(0, numArtists);
     
-    selection 
+    selection
       .attr('transform', `rotate(-90)`);
 
     const g = selection.selectAll('.container').data([null]);
@@ -343,7 +343,7 @@
     const artistText = selection.selectAll('.artist-text').data(selectedLegendList);
     const artistTextEnter = artistText.enter().append('g')
         .attr('class', 'artist-text d-block d-md-none')
-        .attr('transform', 'translate(-50, 40) rotate(90)');
+        .attr('transform', 'translate(-20, 95) rotate(90)');
     
     artistTextEnter.merge(artistText)
       .append('text')
@@ -429,7 +429,12 @@
       // .offset(d3.stackOffsetSilhouette)
       .offset(d3.stackOffsetWiggle);
 
+
     var series = stack(dataToStack);
+    
+    console.log(series);
+    console.log(series[0].map(d => d[0]));
+
     const areaGenerator = d3$1.area()
       .x(d => xScale(getDateFromWeek(d.data.week)))
       .y0(d => yScale(selectedLegendList.length != 0 && (selectedLegendList.includes(d.artist)) ? 0 : d[0]))
@@ -504,24 +509,32 @@
 
     // treeWidth = document.getElementById('tree').clientWidth;
     treeWidth = document.getElementById('tree').clientWidth < 500 ? 1000 : document.getElementById('tree').clientWidth;
-    treeHeight = window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
+    treeHeight = 1000;//window.innerHeight - document.getElementById('navbar-placeholder').clientHeight - 5;
 
     areaWidth = document.getElementById('stacked-area-artist-vertical').clientWidth;
     areaHeight = treeHeight;  
 
     const verticalAreaSvg = d3$1.select('.stacked-area-artist-svg')
-      .attr('height', areaHeight)
-      .attr('width', areaWidth);
+        .attr('height', areaHeight)
+        .attr('width', areaWidth);
+
+    // verticalAreaSvg.append('rect')
+    //     .attr('width', '100%')
+    //     .attr('height', '100%')
+    //     .attr('fill', 'black')
 
     const treeSvg = d3$1.select('.tree')
       .attr('height', treeHeight)
       .attr('width', treeWidth);
 
-    // console.log(treeHeight)
+    // treeSvg.append('rect')
+    //     .attr('width', '100%')
+    //     .attr('height', '100%')
+    //     .attr('fill', 'black')
 
     verticalAreaG = verticalAreaSvg.append('g')
       // .attr('class', 'd-none d-md-block')
-      .attr('transform', `translate(${0}, 0), rotate(90)`);
+      .attr('transform', `translate(${0}, ${0}), rotate(90)`);
 
     artistLegendG = verticalAreaSvg.append('g')
       .attr('class', 'legend')
@@ -530,7 +543,7 @@
     treeG = treeSvg.append('g')
       .attr('class', 'tree');
 
-    
+
     topArtistsTrimmed = topArtists.slice(0, numArtists);
     const topGenresTrimmed = topArtistsTrimmed.map(a => deepestGenresByArtist[a]);
     addArtistsToTree(topArtistsTrimmed, jsonData);
