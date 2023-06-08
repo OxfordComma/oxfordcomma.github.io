@@ -108,20 +108,8 @@ app.get('/js/bootstrap.min.js', function(req, res) {
 });
 
 app.get('/css/bootstrap.min.css', function(req, res) {
-    res.sendFile(path.join(__dirname + '/musicviz/css/bootstrap.min.css'));
-});
-
-app.get('/hapn', function(req, res) {
-    res.sendFile(path.join(__dirname + '/HAPN/hapn.html'));
-});
-
-app.get('/background.jpeg', function(req, res) {
-    res.sendFile(path.join(__dirname + '/HAPN/background.jpeg'))
-})
-
-
-app.get('/data/16Jun2019_214451.csv', function(req, res) {
-    res.sendFile(path.join(__dirname + '/musicviz/data/16Jun2019_214451.csv'));
+	console.log('bootstrap')
+    res.sendFile(path.join(__dirname + '/css/bootstrap.min.css'));
 });
 
 app.listen(3000);

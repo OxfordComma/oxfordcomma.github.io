@@ -40,7 +40,7 @@ export const stackedAreaVertical = (selection, props) => {
   const margin = {left: 0, right: 0}
   const innerWidth = width - margin.left - margin.right
   
-  selection
+  selection 
     .attr('transform', `rotate(-90)`);
 
   const g = selection.selectAll('.container').data([null]);
@@ -56,7 +56,7 @@ export const stackedAreaVertical = (selection, props) => {
   const artistText = selection.selectAll('.artist-text').data(selectedLegendList)
   const artistTextEnter = artistText.enter().append('g')
       .attr('class', 'artist-text d-block d-md-none')
-      .attr('transform', 'translate(-20, 95) rotate(90)')
+      .attr('transform', 'translate(-50, 40) rotate(90)')
   
   artistTextEnter.merge(artistText)
     .append('text')
