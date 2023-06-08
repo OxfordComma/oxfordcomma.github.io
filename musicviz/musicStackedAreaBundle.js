@@ -468,7 +468,7 @@
   console.log(endDate);
 
   loadStackedArtistData(
-    'https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/music2018.csv',
+    'https://raw.githubusercontent.com/OxfordComma/oxfordcomma.github.io/master/musicviz/data/music2018.csv',
     startDate,
     endDate).then(data => {
   // loadStackedArtistData('/Users/nick/oxfordcomma.github.io/musicviz/data/16Jun2019_214451.csv').then(data => {
