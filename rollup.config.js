@@ -2,45 +2,32 @@ import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
+import json from 'rollup-plugin-json';
 
 export default [{
-  input: 'music2018_main.js',
-  external: ['d3'],
+  input: 'musicviz/musicStackedArea.js',
+  external: ['d3', 'mongodb'],
   output: {
-    file: 'music2018bundle.js',
+    file: 'musicviz/musicStackedAreaBundle.js',
     format: 'iife',
     sourcemap: true,
     globals: { d3: 'd3'}
   },
   plugins: [
-    resolve(),
     commonjs(),
     globals(),
-    builtins()
-  ]
-}, {
-  input: 'music2017_main.js',
-  external: ['d3'],
-  output: {
-    file: 'music2017bundle.js',
-    format: 'iife',
-    sourcemap: true,
-    globals: { d3: 'd3'}
-  },
-  plugins: [
     resolve(),
-    commonjs(),
-    globals(),
-    builtins()
+    builtins(),
+    json()
   ]
 }, {
-  input: 'tree_main.js',
-  external: ['d3'],
+  input: 'musicviz/tree_main.js',
+  external: ['d3', 'mongoose'],
   output: {
-    file: 'treebundle.js',
+    file: 'musicviz/treebundle.js',
     format: 'iife',
     sourcemap: true,
-    globals: { d3: 'd3'}
+    globals: { d3: 'd3', mongoose: 'mongoose'}
   },
   plugins: [
     resolve(),

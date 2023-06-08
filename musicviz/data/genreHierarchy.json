@@ -1,0 +1,221 @@
+{
+  "id": "music",
+  "children": [
+    {
+      "id": "rock",
+      "children": [
+        {
+          "id": "indie",
+          "children": [
+            {
+              "id": "indierock",
+              "children": []
+            },
+            {
+              "id": "emo",
+              "children": [
+                {
+                  "id": "midwestemo",
+                  "children": []
+                },
+                {
+                  "id": "screamo",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "indiepop",
+              "children": []
+            },
+            {
+              "id": "folk",
+              "children": [
+                {
+                  "id": "folkrock",
+                  "children": []
+                },
+                {
+                  "id": "indiefolk",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mathrock",
+          "children": []
+        },
+        {
+          "id": "postrock",
+          "children": [
+            {
+              "id": "shoegaze",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "classicrock",
+          "children": []
+        },
+        {
+          "id": "garagerock",
+          "children": []
+        },
+        {
+          "id": "poprock",
+          "children": []
+        },
+        {
+          "id": "surf",
+          "children": []
+        },
+        {
+          "id": "noiserock",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "pop",
+      "children": [
+        {
+          "id": "dreampop",
+          "children": []
+        },
+        {
+          "id": "singersongwriter",
+          "children": []
+        },
+        {
+          "id": "acoustic",
+          "children": []
+        },
+        {
+          "id": "electropop",
+          "children": []
+        },
+        {
+          "id": "powerpop",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "electronic",
+      "children": [
+        {
+          "id": "dance",
+          "children": []
+        },
+        {
+          "id": "electronica",
+          "children": []
+        },
+        {
+          "id": "electro",
+          "children": []
+        },
+        {
+          "id": "house",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "country",
+      "children": []
+    },
+    {
+      "id": "jazz",
+      "children": []
+    },
+    {
+      "id": "alternative",
+      "children": [
+        {
+          "id": "punk",
+          "children": [
+            {
+              "id": "poppunk",
+              "children": []
+            },
+            {
+              "id": "punkrock",
+              "children": []
+            },
+            {
+              "id": "sparklepunk",
+              "children": []
+            },
+            {
+              "id": "postpunk",
+              "children": []
+            },
+            {
+              "id": "folkpunk",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "lofi",
+          "children": []
+        },
+        {
+          "id": "alternativerock",
+          "children": []
+        },
+        {
+          "id": "altcountry",
+          "children": []
+        },
+        {
+          "id": "hardcore",
+          "children": [
+            {
+              "id": "posthardcore",
+              "children": []
+            },
+            {
+              "id": "melodichardcore",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "grunge",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "hiphop",
+      "children": [
+        {
+          "id": "rap",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "r&b",
+      "children": [
+        {
+          "id": "soul",
+          "children": []
+        },
+        {
+          "id": "funk",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "blues",
+      "children": []
+    }
+  ]
+}
